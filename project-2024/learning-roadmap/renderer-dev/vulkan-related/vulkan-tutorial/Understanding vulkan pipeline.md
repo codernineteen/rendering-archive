@@ -19,3 +19,5 @@
     
 - Draw frames by acquiring images, submitting the right draw command buffer and returning the images back to the swap chain (main loop)
 	need for synchronization of execution order. (ex. semaphore, mutex.)
+
+

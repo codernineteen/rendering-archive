@@ -47,5 +47,24 @@ if (vkCreateInstance(&createInfo, /*custom allocator*/ nullptr, &instance) != VK
 ## Validation layer
 
 Using vulkan means that there are lots of things that developer should handle.
+For example, using a new GPU feature and forgetting to request it at **logical device** creation time.
 To avoid errors hard to debug from mistakes, we can use elegant system called as 'validation layers'
+
+Key features in validation layer
+-  Checking the values of parameters against the specification to detect misuse
+    
+- Tracking creation and destruction of objects to find resource leaks
+    
+- Checking thread safety by tracking the threads that calls originate from
+    
+- Logging every call and its parameters to the standard output
+    
+- Tracing Vulkan calls for profiling and replaying
+
+Validation layers can only be used when it is installed in host system. so we need to add a feature to turn off validation layer selectively when we release it.
+
+
+[Two types of validation layers]
+1. instance specific : check calls related to global vulkan objects
+2. device specific : the layer is deprecated now, but it is recommended to enable it for compatibility.
 
