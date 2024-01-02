@@ -8,6 +8,9 @@
 
 
 week 1 : introduction
+- supervised learning
+- why neural network is taking off now
+- structured data vs unstructured data
 week 2 : basics of neural network programming
 week 3 : one hidden layer neural network
 week 4 : Deep neural networks
