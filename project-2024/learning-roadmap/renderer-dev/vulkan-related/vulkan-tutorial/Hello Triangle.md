@@ -68,3 +68,7 @@ Validation layers can only be used when it is installed in host system. so we ne
 1. instance specific : check calls related to global vulkan objects
 2. device specific : the layer is deprecated now, but it is recommended to enable it for compatibility.
 
+# Physical device
+
+After initializing Vulkan library(instance), we need to look for and select a graphics card in the system. (Note that we can select graphic cards as many as we want.)
+
