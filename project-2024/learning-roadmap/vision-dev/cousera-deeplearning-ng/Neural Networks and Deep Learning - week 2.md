@@ -13,14 +13,14 @@ Before we start, let's see basic notations first.
 	- feature vector : $$x \in R^{dim_X}$$
 	- y : label that has a value zero or one.
 	- m - training example : $$(x_1, y_1), (x_2, y_2),...,(x_n, y_n) $$
-	- number of training set / test set : $$ m_{training} , m_{test} $$
-	- put all training examples into compact notation with a matrix 'X' :  $$ X = \begin{bmatrix} 
+	- number of training set / test set : $$m_{training} , m_{test}$$
+	- put all training examples into compact notation with a matrix 'X' :  $$X = \begin{bmatrix} 
 	  \vdots & \vdots & ... & \vdots\\ 
 	  x^{(1)} & x^{(2)} & ... & x^{(m)}\\ 
 	  \vdots & \vdots & ... & \vdots\\ 
 	  \end{bmatrix}$$ , where width is number of training examples and height is dimension of each of those.
 	 To train neural network easily, it is also a good way to stack y-label in a column major.
-	 $$ Y = \begin{bmatrix} 
+	 $$Y = \begin{bmatrix} 
 	  \vdots & \vdots & ... &\vdots\\ 
 	  y^{(1)} & y^{(2)} & ... & y^{(m)}\\ 
 	  \vdots & \vdots & ... & \vdots\\ 
@@ -58,9 +58,7 @@ Then, How we can change this 'W' and 'b' parameters? we can do that by defining 
 	On the other hand, when y is qual to zero, we want to make $\log(1-\hat{y})$ as big as possible, hence, we want to make small $\hat{y}$
 
 In conclusion, the cost function will be the average of sum of Loss function result on each elements in training examples.
-$$
-J(W, b) = \frac{1}{m}\sum_{i=1}^{m}L(\hat{y^{(i)}, y^{(i)}}) = -\frac{1}{m}\sum_{i=1}^{m}(y^{(i)}\log\hat{y^{(i)}} + (1-y^{(i)})\log(1-\hat{y^{(i)}}))
-$$
+$$J(W, b) = \frac{1}{m}\sum_{i=1}^{m}L(\hat{y^{(i)}, y^{(i)}}) = -\frac{1}{m}\sum_{i=1}^{m}(y^{(i)}\log\hat{y^{(i)}} + (1-y^{(i)})\log(1-\hat{y^{(i)}}))$$
 **It turns out that the logistic algorithm can be viewed as a very small neural network.**
 
 
@@ -78,9 +76,13 @@ Now let's see how a gradient descent algorithm works in regard to one variable '
 
 In logistics regression, we want to optimize two parameters 'W' and 'b'.
 So we can take a partial derivate approach here to optimize those.
-$$
-W := W-\alpha\frac{\partial{J(W, b)}}{\partial{W}}
-$$
+$$W := W-\alpha\frac{\partial{J(W, b)}}{\partial{W}}$$
 $$b := b-\alpha\frac{\partial{J(W, b)}}{\partial{b}}$$
 
 # Derivatives
+a thing to remember here :
+ "Derivatives is just a slop of function."
+
+
+# Computation Graph
+![[Pasted image 20240102191554.png]]
