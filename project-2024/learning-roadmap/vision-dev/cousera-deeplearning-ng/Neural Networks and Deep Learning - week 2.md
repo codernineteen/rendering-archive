@@ -86,3 +86,137 @@ a thing to remember here :
 
 # Computation Graph
 ![[Pasted image 20240102191554.png]]
+
+
+# Computing Derivatives
+![[Pasted image 20240104075518.png]]
+
+# Derive gradient descent for logistic regression
+using computation graph
+
+The below image shows how we get a loss function for logistic regression by using computation graph.
+![[Pasted image 20240104081427.png]]
+
+First, we do derivates of Loss function against a.
+The "da" variable denotes that final ouput about intermediate quantities. 
+![[Pasted image 20240104081635.png]] Utilizing derivative formulas, we can derive the $\frac{dL(a,y)}{da}$
+![[Pasted image 20240104082201.png]]
+
+By repeating above back propagation process, finally we can get $dW_1$ ,$dW_2$ and $db$. Then we can use it to update each of values to optimize them.
+
+Let's expand this one training example gradient descent to m-training examples case.
+- recap 
+$$J(W, b) = \frac{1}{m}\sum_{i=1}^{m}L(\hat{y^{(i)}, y^{(i)}}) = -\frac{1}{m}\sum_{i=1}^{m}(y^{(i)}\log\hat{y^{(i)}} + (1-y^{(i)})\log(1-\hat{y^{(i)}}))$$
+
+If we want to take partial derivatives about J(w, b) in respect to w1, it will be :
+$$\frac{\partial{J(W, b)}}{\partial{W1}} = \frac{1}{m}\sum_{i=1}^{m}\frac{\partial{L(\hat{y^{(i)}, y^{(i)}})}}{\partial{W_1^{(i)}}}$$
+Because we already solved how the derivatives related to W1 is calculated in one training example, we just need to repeat the same process about m-training examples.
+
+- Professor's derivation
+![[Pasted image 20240104084254.png]]
+One problem is here. That is it requires two for-loops in the calculation process.
+The one is for training examples and the other is for features of each training example.
+In deep learning, we handle a huge amount of data and O(n^2) time complexity is inefficient in regard to this amount of data.
+-> **vectorization** technique comes in handy
+
+# Vectorization
+
+For example,
+There is an equation $$z=w^Tx + b$$ When we calculate it non-vectorized form, it may follow this algorithm using loop.
+```plain
+z = 0
+for i in range(n,x) :
+	z += w[i] * x[i]
+z += b
+```
+
+
+In python, we can vectorize this equation using numpy library.
+```python
+z = np.dot(w, x) + b
+```
+
+Now we are curious how it can be faster than iterative approach. Does it really avoid looping in calculation?
+
+Both of CPU and GPU can use SIMD(single instruction multiple data). When we use numpy library in python, we can utilize this kind of instruction because we can handle each of elements in vector independently.
+Therefore, it is inevitable to use iteration in arithematic operation on computer, but if we use SIMD approach , we can run it much faster through parallelism of processors.
+
+
+- more examples of vectorization
+1. matrix multiplication
+ - without vectorization
+```
+	     u = Av # A is a matrix and v is a vector
+	     ->
+	     for i..
+		     for j..
+			     u[i] += A[i][j] * v[j]
+```
+- with vectorization
+```python
+u = np.dot(A, v)
+```
+
+2. apply exponential operation on every elements in a vector or matrix
+- without
+```python
+for i in range(n):
+	u[i] = math.exp(v[i])
+```
+- with
+```python
+u = np.exp(v)
+```
+
+With vectorization, not only we can compute operations faster than for-loop, but also can represent statements in a semantic way.
+
+# Optimize Logistic regression
+
+- initial algorithm
+```
+J = 0, dw1 = 0, dw2 = 0, db = 0
+for i = 1 to m:
+  z^(i) = W^Tx^(i)+b
+  a^(i) = sigmoid(z^(i))
+  J += -[y^(i)loga^(i)+(1-y^(i))log(1-a^(i))]
+  dz^(i) = a^(i) - y^(i) # dz/da
+  dw1 += x1^(i)dz^(i)
+  dw2 += x2^(i)dz^(i)
+  db += dz^(i)
+J = J/m, dw1 = dw1/m, dw2 = dw2/m, db = db/m 
+```
+
+- vectorize common operations
+```
+J = 0, dw = np.zeros(dim(x), 1), db = 0 # vectorize two W parameters to one vector
+for i = 1 to m:
+  z^(i) = W^Tx^(i)+b
+  a^(i) = sigmoid(z^(i))
+  J += -[y^(i)loga^(i)+(1-y^(i))log(1-a^(i))]
+  dz^(i) = a^(i) - y^(i) # dz/da
+  dw += x^(i)dz^(i)
+  db += dz^(i)
+J = J/m, dw = dw/m, db = db/m 
+```
+
+
+We can further optimize this process.
+
+1. Vectorize forward propagation
+To get a predictoin value, we need to compute each of it related to each of samples.
+$z^{(1)}=W^Tx^{(1)}+b$, $z^{(2)}=W^Tx^{(2)}+b$, and so on.
+
+How can we compute all Zs and predictions at one step? the answer is trivially vectorize those.
+- Z =  $[z^{(1)}, z^{(2)}... ]$
+- X =  $[x^{(1)}, x^{(2)}... ]$
+- b = $[b,b,...]$
+Therefore all the equation can be represented as one equation.
+$$Z=w^TX+B$$, where Z and X m-dimensional row vector.
+
+In python statements,
+```python
+Z = np.dot(w.T, X) + b # w.T means transpose of w 
+```
+Although variable 'b' is a real number, python has a functionality to broadcast the value to target matrix or vector by expanding the real number automatically.
+
+2. Vectorize backward propagation
