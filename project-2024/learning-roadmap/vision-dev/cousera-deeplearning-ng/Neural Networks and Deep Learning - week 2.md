@@ -220,3 +220,97 @@ Z = np.dot(w.T, X) + b # w.T means transpose of w
 Although variable 'b' is a real number, python has a functionality to broadcast the value to target matrix or vector by expanding the real number automatically.
 
 2. Vectorize backward propagation
+
+# Vectorizing Logistic regression's gradient descent
+
+Based on m-training examples, we follow belows to get derivative of z
+$$dz^{(1)} = a^{(1)} - y^{(1)}, dz^{(2)} = a^{(2)} - y^{(2)}, ...$$
+By grouping all individual dzs, we can vectorize it.
+$$dZ = [dz^{(1)}, dz^{(2)}, ..., dz^{(m)}]$$
+If we substitue dz(i) with a(i) - y(i), it will be
+$$dZ = [a^{(1)} - y^{(1)}, a^{(2)} - y^{(2)}, ..., a^{(m)} - y^{(m)}]$$
+
+The final value of 'dW' is dependent on dz like below
+```
+dw = 0
+dw += x(1)dz(1)
+dw += x(2)dz(2)
+.
+.
+.
+dw /= m # averaging
+```
+and derivative of bias 'b' is simply sum of 'dz'
+```
+db = 0
+db += dz(1)
+db += dz(2)
+.
+.
+.
+db /= m
+```
+
+If we represent process of computating 'db' with numpy library,
+```python
+db = np.sum(dZ)/m
+```
+and for 'dw'
+```python
+dW = np.sum(np.dot(X, dZ.T))/m
+```
+
+Now from above new representations, we can optimize implementation of logistic regression further by removing outside for loop.
+- pseudo code
+```plain
+J = 0, dw = np.zeros(dim(x), 1), db = 0 # vectorize two W parameters to one vector
+
+Z = np.dot(W.T, X)+b
+A = sigmoid(Z)
+J = np.sum(YlogA+(1-Y)log(1-A))/m
+dZ = A - Y # dz/da
+dW = np.sum(np.dot(X, dZ.T))/m
+db = np.sum(dZ)/m
+```
+
+
+# Broadcasting in Python
+
+General principle is
+
+A(m x n matrix) operator(+, -, x, /) B(1 x n matrix) 
+-> B becomes (m x n) matrix by copying its row m times.
+
+# python/numpy tip
+
+- do not use rank 1 arrays
+	- rank 1 array  example ) `np.random.randn(5)`
+	- rank 1 row vector exampe )` np.random.randn(5,1)` -> we can identify whether it is column direction or row direction in this way.
+- reshape rank 1 array
+	- `a =  a.reshape((5,1))`
+- feel free to use assert to check dimension .
+	- `assert(a.shape == (5,1))`
+
+
+---
+
+# Justification of Logistic regression cost function
+
+$$\hat{y}=\sigma(w^ix+b)$$ where $\sigma(z)=\frac{1}{1+e^{-z}}$
+
+$\hat{y}=p(y=1|x)$ means that
+- if y = 1, p(y|x) = $\hat{y}$
+- if y = 0, p(y|x) = $1-\hat{y}$
+To summarize above two equation, we can represent those in one line:
+$$p(y|x)=\hat{y^y}(1-\hat{y})^{(1-y)}$$
+If we put 0 and 1 into you, we can notice that the equation is equivalent to previous equations.
+
+Because log function is strictly monotonically increasing function, Maximizing log(p) should gives us similar result of optimizing p.
+
+$$\log(y|x)=\log\hat{y^y}(1-\hat{y})^{(1-y)}=(y\log\hat{y} + (1-y)\log(1-\hat{y}))=-L(\hat{y}, y)$$
+
+Probability all the labels in training set is
+$$p(labels)=\prod_{i=1}p(y^{(i)}|X^{(i)})$$
+
+Our goal is to carray out maximum likelihood estimation. That is, maximizing p and it is similar to maximizing log of p.
+By substituting '$\log p$' in right term with derived loss function, we can justify the cost function that we've seen previous sections.
