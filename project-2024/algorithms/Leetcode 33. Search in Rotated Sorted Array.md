@@ -1,5 +1,6 @@
 
-**Failed to solve**
+- #Meidum #failed
+- 2024/1/5
 
 # Description
 There is an integer array `nums` sorted in ascending order (with **distinct** values).
