@@ -81,4 +81,4 @@ public:
 ```
 
 # 4. Result
-![[Pasted image 20240106172438.png]]
+![[../../images/Pasted image 20240106172438.png]]
