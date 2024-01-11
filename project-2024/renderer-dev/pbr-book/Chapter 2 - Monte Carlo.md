@@ -11,7 +11,7 @@ Randomized algorithms fall broadly into two classes
 - *Las Vegas algorithms*
 - *Monte Carlo algorihtms*
 
-# Monte Carlo : Basics
+# Monte Carlo Integration : Basics
 ---
 It is based on randomization.
 randomization is related to probability and statistics as its foundation.
@@ -61,7 +61,7 @@ $E[F_n]$ is equal to the integral.
 When n independent samples X_i are taken from uniform multidimensional PDF, consider 3d this integral
 ![](../../../../images/Pasted%20image%2020240109090155.png)
 
-If a sampe $X_i=(x_i,y_i,z_i)$ are chosen uniformly from the cube range '$[x_0, x_1]\times[y_0, y_1]\times[z_0, z_1]$'
+If a sampe $X_i=(x_i,y_i,z_i)$ are **chosen uniformly** from the cube range '$[x_0, x_1]\times[y_0, y_1]\times[z_0, z_1]$'
 - The PDF p(X) 
 	![](../../../../images/Pasted%20image%2020240109090435.png)
 - the monte carlo estimator![](../../../../images/Pasted%20image%2020240109090454.png)
@@ -76,3 +76,53 @@ Note that p(x) must not be zero in this case.
 
 - derivation
 ![](../../../../images/Pasted%20image%2020240109090848.png)
+
+## 2.1.4 Error in Monte Carlo estimators
+
+Variance in Monte carlo estimator is important to justify its use.
+a few of properties of variance below:
+![](../../../images/Pasted%20image%2020240111164716.png)
+![](../../../images/Pasted%20image%2020240111164902.png)
+![](../../../images/Pasted%20image%2020240111164908.png)
+
+If the estimator is a sum of independent random variables
+-> the variance of sum is the sum of individual random variables' variances.
+![](../../../images/Pasted%20image%2020240111165040.png)
+This equation shows us that variance decreases linearly with the number of samples n.
+The error in a Monte Carlo estimate only goes down at a rate of $O(n^{-\frac{1}{2}})$
+
+**Monte carlo is the only practical numerical integration algorithm for high-dimensional integrations.**
+
+Linear decrease in variance with increasing number of samples
+-> easy to compare two different estimators.
+
+ex )
+- first estimator's variance : x
+- second estimator's variance : x/2, but three times as long to compute an estimate.
+In this case, first one is preferable.
+It can take 3 times samples more in time consumed by second estimator -> 3 x variance reduction.
+
+**Efficiency of an estimator**
+$$\epsilon[F]=\frac{1}{V[F]T[F]}$$
+Where, V is variance and T is runtime to compute.
+
+**Additionall, Not all estimators of integrals have expected value that is equal to the value of the integral** -> said to be biased
+The amount of bias is :
+$$\beta=E[F]-\int f(x)dx$$
+Biased estimators may be desirable if they are able to get close to the correct result more quickly than 'unbiased' one.
+Ex)
+- $\frac{1}{n}\sum_{i=1}^{n}X_i$  -> unbiased, has variance with $O(n^{-1})$ 
+- $\frac{1}{2}max(X_1, X_2, ..., X_n)$ 
+	- expected value is $0.5\frac{n}{n+1}\ne0.5$ -> biased 
+	- variance is $O(n^{-2})$  -> **better**
+
+
+ ## Mean Square Error
+ ![](../../../images/Pasted%20image%2020240111174616.png)
+ - for unbiased estimator, MSE is equal to the variance
+ - otherwise, sum of variance and the squared bias of the estimator.
+
+
+
+# Monte Carlo Integration : Improving Efficiency
+
