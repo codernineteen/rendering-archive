@@ -38,7 +38,7 @@ Instead of targeting to find a k, we can change our perspective to find a subarr
 
 In this way, it is much more effective because the 'sum-k' always starts from 0-index.
 Also, because current sum can be next 'sum' - k', we need to increment a value of a key whose value is equal to sum.
-![](../../Pasted%20image%2020240112141014.png)
+![](../../images/Pasted%20image%2020240112141014.png)
 
 
 # 3. Solution
