@@ -113,3 +113,59 @@ But because the function is linear, no matter how many hidden layers we have in 
 -> less useless..
 
 
+# Implement back propagation
+
+## Derivatives of activation function
+---
+
+1. sigmoid activation function
+$$g(z)=\frac{1}{1+e^{-z}}, g'(z)=g(z)(1-g(z))$$
+For example, 
+when z = 10 , g' is about 0
+when z = -10,  g' is about 0
+when z = 0, g' is about 1/4
+
+2. Tanh function
+$$g(z)=tanh(z), g'(z) = 1-(tanh(z))^2$$
+
+3. ReLU and Leaky ReLU
+- ReLU
+$$g(z)=max(0, z),g'(z)=\begin{cases}&0&\text{if}z<0\\&1&\text{if}z>0\end{cases}$$
+Note that the case of 'z=0' is undefined.
+
+- Leaky ReLU
+$$g(z)=max(0.01*z, z),g'(z)=\begin{cases}&0&\text{if}z<0.01\\&1&\text{if}z>0\end{cases}$$
+
+
+## Gradient descent for neural networks
+---
+Let's overview the process of gradient descent.
+- params : $W^{[1]},b^{[1]},W^{[2]},b^{[2]}$
+- dimension of each params are $(n^{[1]}, n^{[0]}),(n^{[1]},1),(n^{[2]},n^{[1]}),(n^{[2]},1)$
+	It is recommended to initialize these parameters randomly, not zeros.
+- Gradient descent follows :
+	- Repeat
+	```
+	Compute predictions(y hat_i)
+	dW^[1] = dJ/dw^[1], db^[1] = dJ/db^[1], ...
+	W^[1] = 1 - (learning_rate)*dW^[1]
+	b^[1] = 1 - (learning_rate)*db^[1]
+	// same for W^[2], b^[2]
+	```
+
+Then, Forward propagations are :
+![](../../../images/Pasted%20image%2020240111083008.png)
+
+After this, we can do back propagation following the computation graph in a reverse way
+![](../../../images/Pasted%20image%2020240111083353.png)
+Note that computation of dz^1 use element-wise product operation about same dimension of two matrices.
+
+# Random initialization
+Intializing W with all zeros can cause a problem.
+When we initialize W with zeros, hidden units in hidden layer become completely identical(symmetric).
+Both of hidden units start to compute same function, also they have same influences on output unit.
+By induction approach, this will be kept on every iterations because the first iteration turned out that it is true.
+By the way, it is okay to initialize bias as zeros.
+
+Solution is to use randomization.
+ex) `W_1 = np.random.randn((2,2)) * 0.01` -> here we multiplied 0.01 because we want to avoid z become so huge or small when we use sigmoid or tanh function for activation.
