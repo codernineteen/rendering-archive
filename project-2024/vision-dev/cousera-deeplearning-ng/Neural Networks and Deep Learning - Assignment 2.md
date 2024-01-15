@@ -43,3 +43,6 @@ What we did here :
 - Computed the cross entropy loss
 - Implemented forward and backward propagation
 - Seen the impact of varying the hidden layer size, including overfitting.
+
+# Reference
+https://www.coursera.org/learn/neural-networks-deep-learning

@@ -169,3 +169,6 @@ By the way, it is okay to initialize bias as zeros.
 
 Solution is to use randomization.
 ex) `W_1 = np.random.randn((2,2)) * 0.01` -> here we multiplied 0.01 because we want to avoid z become so huge or small when we use sigmoid or tanh function for activation.
+
+# Reference
+https://www.coursera.org/learn/neural-networks-deep-learning

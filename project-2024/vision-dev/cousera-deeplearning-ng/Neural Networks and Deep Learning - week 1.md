@@ -14,3 +14,5 @@ week 1 : introduction
 week 2 : basics of neural network programming
 week 3 : one hidden layer neural network
 week 4 : Deep neural networks
+
+

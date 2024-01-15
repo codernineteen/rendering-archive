@@ -20,3 +20,7 @@
 	- propagate function to compute 'cost' and 'derivatives'
 	- optimize function to update parameters
 	- predict fuction
+
+
+# Reference
+https://www.coursera.org/learn/neural-networks-deep-learning

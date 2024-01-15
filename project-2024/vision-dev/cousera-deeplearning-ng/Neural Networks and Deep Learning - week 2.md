@@ -314,3 +314,6 @@ $$p(labels)=\prod_{i=1}p(y^{(i)}|X^{(i)})$$
 
 Our goal is to carray out maximum likelihood estimation. That is, maximizing p and it is similar to maximizing log of p.
 By substituting '$\log p$' in right term with derived loss function, we can justify the cost function that we've seen previous sections.
+
+# Reference
+https://www.coursera.org/learn/neural-networks-deep-learning
