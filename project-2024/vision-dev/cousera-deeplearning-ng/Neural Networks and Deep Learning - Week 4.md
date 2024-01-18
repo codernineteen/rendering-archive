@@ -73,6 +73,54 @@ If we solve this using tree structure allowing multiple hidden layers, the depth
 On the other hand, If we are not allowed to use multiple hidden layers,  the complexity goes up to O(2^n) when we have 1 hidden layer.
 
 
+# Building blocks of Deep neural networks
+
+When we have such a neural network, let's assume that we're one a layer number 'L'
+![](../../../images/Pasted%20image%2020240117091652.png)
+Then for forward prop, the input will be $a^{[l-1]}$ and output will be $a^{[l]}$ and $cache(z^{[l]})$
+At the same time, the input will be $da^{[l]},cache(z^{[l]})$ and output will be $da^{[l-1]},dw^{[l]},db^{[l]}$ for backward prop.
+- drawing description
+![](../../../images/Pasted%20image%2020240117092212.png)
+
+If we apply above process for whole network, 
+![](../../../images/Pasted%20image%2020240117092552.png)
+ and Along wtih cache z , we'll cache w, b parameters either for implementation purpose.
+ 
+
+# Forward propagation and Back propagation
+
+- Forward
+	$$Z^{[l]}=W^{[l]}A^{[l-1]}+b^{[l]}$$
+	$$A^{[l]}=g^{[l]}(Z^{[l]})$$
+	,where $a^{[0]}$ is equal to an input feature $x$
+
+- Backward
+	$$dz^{[l]}=da^{[l]}*g\prime^{[l-1]}(z^{[l-1]})$$
+$$dw^{[l]}=dz^{[l]}a^{[l-1]^T}$$
+$$db^{[l]}=dz^{[l]}$$
+$$da^{[l-1]}=w^{[l]^T}dz^{[l]}$$
+With vectorization,
+$$dZ^{[l]}=dA^{[l]}*g\prime^{[l-1]}(Z^{[l-1]})$$
+$$dW^{[l]}=\frac{1}{m}dZ^{[l]}A^{[l-1]^T}$$
+$$db^{[l]}=\frac{1}{m}np.sum(dZ^{[l]},axis=1,keepdims=True)$$
+$$dA^{[l-1]}=W^{[l]^T}dZ^{[l]}$$
+In terms of forward propagation recursion, the input is 'x', Then what is the input for back prop?
+It will be $da{[l]}$, which is derivatives of $\hat{y}$.
+For example, if we use logistc regression,
+$$\frac{d\hat{y}}{da}=-\frac{y}{a}+\frac{1-y}{1-a}$$
+
+# Parameters vs Hyper Parameters
+
+We've seen parameters : $w^{[l]}, b^{[l]}$
+About hyper parameters : learning rate $\alpha$ , # of iterations, # of hidden layers, # of hidden units, choice of activation functions.
+All of parameters that is not directly relate to computation forward/backward prop itself is called 'hyper parameters'.
+Because they somewhat control the result of parameters, we need to adjust them appropriately during the empirical process.
+![](../../../images/Pasted%20image%2020240117101020.png)
+
+
+
+
+
 
 # Reference
 https://www.coursera.org/learn/neural-networks-deep-learning
