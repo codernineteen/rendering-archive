@@ -45,14 +45,14 @@ For that, we need to decode what the `B` is first and this is exact;y why i took
 In other words, whenever we encounter a nested character `[`, we should stop adding a character to decoded string and start to find what the nested decode string is first.
 # 3. Solution
 
-Note that it runs as fast as stack approach
+Note that it runs as fast as stack approach if we use a refernce of string parameter
 - Recursion
 ```cpp
 class Solution {
 
 public:
 
-    string solve(string s, int& idx) {
+    string solve(const string& s, int& idx) {
         string res = "";
         string numStr = "";
         int multiplier = 0;
