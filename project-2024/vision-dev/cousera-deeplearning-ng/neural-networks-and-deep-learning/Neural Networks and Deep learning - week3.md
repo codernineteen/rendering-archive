@@ -154,10 +154,10 @@ Let's overview the process of gradient descent.
 	```
 
 Then, Forward propagations are :
-![](../../../images/Pasted%20image%2020240111083008.png)
+![](../../../../images/Pasted%20image%2020240111083008.png)
 
 After this, we can do back propagation following the computation graph in a reverse way
-![](../../../images/Pasted%20image%2020240111083353.png)
+![](../../../../images/Pasted%20image%2020240111083353.png)
 Note that computation of dz^1 use element-wise product operation about same dimension of two matrices.
 
 # Random initialization

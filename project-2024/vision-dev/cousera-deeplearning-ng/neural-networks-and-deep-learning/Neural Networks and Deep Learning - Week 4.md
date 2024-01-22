@@ -1,15 +1,15 @@
 
 Quick recap :
 - logistic regression
-![](../../../images/Pasted%20image%2020240115124929%201.png)
+![](../../../../images/Pasted%20image%2020240115124929%201.png)
 
 - 1 hidden layer neural network
-![](../../../images/Pasted%20image%2020240115125004%201.png)
+![](../../../../images/Pasted%20image%2020240115125004%201.png)
 
 Then, what is deep neural network?
 We can say that deep neural network is a network having many hidden layers.
 Technically a shallow network like logistics regression is also neural network, but researchers found out that there are features that only deep neural network can obtain.
-![](../../../images/Pasted%20image%2020240115125135%201.png)
+![](../../../../images/Pasted%20image%2020240115125135%201.png)
 
 # Notation in deep neural network
 Ex) 4 layer NN
@@ -22,7 +22,7 @@ Ex) 4 layer NN
 - $W^{[l]}$ : weighs for $z^{[l]}$
 - $a^{[L]}=\hat{y}$ where, L is upper case.
 	
-![](../../../images/Pasted%20image%2020240115125357%201.png)
+![](../../../../images/Pasted%20image%2020240115125357%201.png)
 
 
 # Forward propagation in deep NN
@@ -38,28 +38,28 @@ Although we have explicit for-loop against number of layers, it is totally okay 
 
 # Getting matrix dimensions right (very important)
 For example, when we have 5 layer NN like below,
-![](../../../images/Pasted%20image%2020240115132403%201.png)
+![](../../../../images/Pasted%20image%2020240115132403%201.png)
 
 The dimensions of each parameters and variables follow :
-![](../../../images/Pasted%20image%2020240115132446%201.png)
+![](../../../../images/Pasted%20image%2020240115132446%201.png)
 
 
 # Why deep representations work well
 
 For the case of face detection, The input will be an image about a human face.
-![](../../../images/Pasted%20image%2020240115132715%201.png)
+![](../../../../images/Pasted%20image%2020240115132715%201.png)
 
 Then, we can think of the first hidden layer as a feature detector or an 'edge' detector.
-![](../../../images/Pasted%20image%2020240115132812%201.png)
+![](../../../../images/Pasted%20image%2020240115132812%201.png)
 
 Now the second layers grouping the edges to form part of faces.
-![](../../../images/Pasted%20image%2020240115132959%201.png)
+![](../../../../images/Pasted%20image%2020240115132959%201.png)
 
 Finally last hidden layer creates a various of faces by using the parts of the face.
-![](../../../images/Pasted%20image%2020240115133105%201.png)
+![](../../../../images/Pasted%20image%2020240115133105%201.png)
 
 The whole process will be
-![](../../../images/Pasted%20image%2020240115133121%201.png)
+![](../../../../images/Pasted%20image%2020240115133121%201.png)
 
 
 The intuition for this example is to find simpler things first and compose it together to form more complex one.
@@ -76,14 +76,14 @@ On the other hand, If we are not allowed to use multiple hidden layers,  the com
 # Building blocks of Deep neural networks
 
 When we have such a neural network, let's assume that we're one a layer number 'L'
-![](../../../images/Pasted%20image%2020240117091652.png)
+![](../../../../images/Pasted%20image%2020240117091652.png)
 Then for forward prop, the input will be $a^{[l-1]}$ and output will be $a^{[l]}$ and $cache(z^{[l]})$
 At the same time, the input will be $da^{[l]},cache(z^{[l]})$ and output will be $da^{[l-1]},dw^{[l]},db^{[l]}$ for backward prop.
 - drawing description
-![](../../../images/Pasted%20image%2020240117092212.png)
+![](../../../../images/Pasted%20image%2020240117092212.png)
 
 If we apply above process for whole network, 
-![](../../../images/Pasted%20image%2020240117092552.png)
+![](../../../../images/Pasted%20image%2020240117092552.png)
  and Along wtih cache z , we'll cache w, b parameters either for implementation purpose.
  
 
@@ -115,7 +115,7 @@ We've seen parameters : $w^{[l]}, b^{[l]}$
 About hyper parameters : learning rate $\alpha$ , # of iterations, # of hidden layers, # of hidden units, choice of activation functions.
 All of parameters that is not directly relate to computation forward/backward prop itself is called 'hyper parameters'.
 Because they somewhat control the result of parameters, we need to adjust them appropriately during the empirical process.
-![](../../../images/Pasted%20image%2020240117101020.png)
+![](../../../../images/Pasted%20image%2020240117101020.png)
 
 
 
