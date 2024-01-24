@@ -1,4 +1,4 @@
-To move one 3d graphics, we need concept of spaces (model , view and projection space in general).
+To move on 3d graphics, we need concept of spaces (model , view and projection space in general).
 The matrices of these spaces is requred to be shared between shaders, thus we need to set it as global.
 What is global in shader?  it is uniform variable!
 
@@ -8,15 +8,15 @@ What is global in shader?  it is uniform variable!
 How to use :
 1. specify a descriptor set layout during pipeline creation
 	- descriptor set layout : the types of resource that are going to be accessed by the pipeline
-	- descriptor set : actual buffer or iamge resources
-1. allocate a descriptor set from a descriptor tool
-2. bind the descriptor set during rendering
+	- descriptor set : actual buffer or image resources
+1. allocate a descriptor set from a descriptor pool
+2. Bind the descriptor set during rendering
 
 # Descriptor set layout
 
 To bind descriptor set layout, we use a struct `VkDescriptorSetLayoutBinding`
 `VkDescriptorSetLayoutBinding` :
-- binding :  the binding number used in the shader
+- binding :  the binding number used in the shader (ex. `layout(binding = 0)` in shader)
 - descriptorType : type of descriptor
 - descriptorCount : the number of values in an array of uniform buffer objects.
 	- ex) a transformation for each of the bones in a skeleton for skeletal animation.

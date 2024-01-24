@@ -230,12 +230,12 @@ With two sampling distributions $p_a$ and $p_b$ and a single sample taken from e
 where $w_a$ and $w_b$ are weighting functions chosen that the expected value of this estimator is the value of the integral of $f(x)$.
 
 With generalizing this estimator,
-![](../../../Pasted%20image%2020240116195657.png)
+![](../../../images/Pasted%20image%2020240116195657.png)
 
 In practice , a good choice for the weighting functions is given by the 'balance heurisitc'
-![](../../../Pasted%20image%2020240116195906.png)
+![](../../../images/Pasted%20image%2020240116195906.png)
 And the power heuristic often reduces variance even further.
-![](../../../Pasted%20image%2020240116200647.png)
+![](../../../images/Pasted%20image%2020240116200647.png)
 
 # Reference
 https://www.pbr-book.org/4ed
