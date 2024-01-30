@@ -40,6 +40,8 @@ The one determination is :
 The other determination is :
 - Is current sum larger than previous max sum ?
 	- If so, update max sum as current sum
+
+![](../../../../images/Pasted%20image%2020240130135026.png)
 # 3. Solution
 
 - Time complexity : O(n)
