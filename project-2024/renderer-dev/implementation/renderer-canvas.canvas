@@ -1,0 +1,27 @@
+{
+	"nodes":[
+		{"id":"6c74d6a2bdb65ab6","type":"group","x":-440,"y":-80,"width":2240,"height":1360,"label":"Architecture"},
+		{"id":"80b360c617a773b7","type":"group","x":-440,"y":-480,"width":1740,"height":161,"label":"Graphics pipeline"},
+		{"id":"1d7f772c0efed545","type":"text","text":"# `MKRenderer`","x":-64,"y":-40,"width":265,"height":80},
+		{"id":"d20d0ce85e01b3f0","type":"text","text":"# [[MKDevice]]\nA wrapper for Physical device and Logical device.\n- Check device suitablity","x":440,"y":364,"width":320,"height":213},
+		{"id":"6097c3ae655bd965","type":"text","text":"# `MKInstance`\n\nA VkInstance Wrapper\n","x":-49,"y":393,"width":250,"height":156},
+		{"id":"833b464adc2abbce","type":"text","text":"# `MKWindow`\n\nWindow system abstraction","x":-380,"y":393,"width":250,"height":156},
+		{"id":"8cf5b7ae05894d0b","type":"text","text":"# `MKValidaionLayer`\n\nAbstraction for validation layers usage","x":-124,"y":700,"width":400,"height":156},
+		{"id":"2e415d7a03b167f1","type":"text","text":"### `ref`","x":276,"y":446,"width":114,"height":50},
+		{"id":"65817459657f0104","type":"text","text":"# Application stage","x":-420,"y":-460,"width":305,"height":121},
+		{"id":"12f93f8dd5599a01","type":"text","text":"# Geometry stage","x":80,"y":-456,"width":300,"height":112},
+		{"id":"c7d553f276f82f53","type":"text","text":"# Rasterization","x":560,"y":-454,"width":280,"height":110},
+		{"id":"0760a4be9cc1368f","type":"text","text":"# Pixel processing","x":1000,"y":-453,"width":280,"height":109}
+	],
+	"edges":[
+		{"id":"3501ef4acf19bdc9","fromNode":"65817459657f0104","fromSide":"right","toNode":"12f93f8dd5599a01","toSide":"left"},
+		{"id":"dcf3d5ba1699e6c1","fromNode":"12f93f8dd5599a01","fromSide":"right","toNode":"c7d553f276f82f53","toSide":"left"},
+		{"id":"77c6979654e681bf","fromNode":"c7d553f276f82f53","fromSide":"right","toNode":"0760a4be9cc1368f","toSide":"left"},
+		{"id":"aad4ef041bf6412b","fromNode":"1d7f772c0efed545","fromSide":"bottom","toNode":"833b464adc2abbce","toSide":"top"},
+		{"id":"f7c227134c8149c1","fromNode":"1d7f772c0efed545","fromSide":"bottom","toNode":"6097c3ae655bd965","toSide":"top"},
+		{"id":"9bc5d2fe1c953c27","fromNode":"6097c3ae655bd965","fromSide":"bottom","toNode":"8cf5b7ae05894d0b","toSide":"top"},
+		{"id":"794e4e870e0556ad","fromNode":"1d7f772c0efed545","fromSide":"bottom","toNode":"d20d0ce85e01b3f0","toSide":"top"},
+		{"id":"f7d4aa52f0febcb1","fromNode":"d20d0ce85e01b3f0","fromSide":"left","toNode":"2e415d7a03b167f1","toSide":"right"},
+		{"id":"356d173ae4cf2d56","fromNode":"2e415d7a03b167f1","fromSide":"left","toNode":"6097c3ae655bd965","toSide":"right"}
+	]
+}
