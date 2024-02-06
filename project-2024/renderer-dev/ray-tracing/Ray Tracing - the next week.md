@@ -117,6 +117,71 @@ class aabb {
 ```
 
 
+# BVH volumes
+The complicated part is to build a heirachy structure of volumes.
+We follow simply :
+1. randomly choose an axis
+2. sort the primitives 
+3. put half in each subtree
+	If a list comming in is two elements, put one in each subtree and end the recursion.
 
+- hit detection
+```cpp
+    bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+    // if the ray doesn't hit super bounding volume, return false
+        if (!box.hit(r, ray_t))
+            return false;
+	// if a ray hit the volume, we check if there are hits on sub-volumes
+        bool hit_left = left->hit(r, ray_t, rec);
+        bool hit_right = right->hit(r, interval(ray_t.min, hit_left ? rec.t : ray_t.max), rec);
+
+        return hit_left || hit_right;
+    }
+```
+
+
+# Texture mapping
+Overview of texture mapping : 
+a vertex <-> texture coordinate <-> texture image
+
+## solid texture (spatial texture)
+a solid texture depends only on the position of each point in 3D space.
+It is coloring space itself, rather than coloring object in that space.
+
+# Sphere texture mapping
+
+To map texture with a spherer, we can apply the concepts of longitude and langitude.
+About u, v coordinates on texture, we can think of these formula
+Horizontally,
+$$u=\frac{\phi}{2\pi}$$
+Vertically,
+$$v=\frac{\theta}{\pi}$$
+
+And about a certain point on the sphere,
+$$y=-cos(\theta)$$
+$$x=-cos(\phi)sin(\theta)$$
+ $$z=sin(\phi)sin(\theta)$$
+- An intuitive image description for this formulas (radius of sphere is equal to 1)
+![](../../../images/Pasted%20image%2020240206103640.png)
+
+Then, To extract $\theta$, $\phi$ from the point (x,y,z) , we need to invert the formulas
+
+For $\phi$,
+$$\phi = atan2(z, -x) = atan2(-z, x) + \pi$$
+We use last formula to avoid that 'u' becomes discontinuous.
+
+For $\theta$,
+$$\theta = arccos(-y)$$
+
+Now we get a (u,v) coordinates for points on the sphere.
+The next step we can take is to extract a pixel value from an image which is corresponded to the coordinates.
+
+Not to harm the resolution of image, we can set u, v as fractional position.
+$$u = \frac{i}{N_x-1}$$
+$$v=\frac{j}{N_y-1}$$
+, where an image has $N_x$ by $N_y$ size.
+So obviously the pixel (i, j) will be :
+$$u * (N_x-1) = i$$
+$$v * (N_y-1) = j$$
 # Reference 
 https://raytracing.github.io/books/RayTracingTheNextWeek.html#motionblur/puttingeverythingtogether
