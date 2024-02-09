@@ -39,7 +39,7 @@ For example,
 
 Based on the above three possible choices, i drew a tree to visualize it.
 However, this is why i failed to solve this problem because there are exponential possible cases whenever the depth of tree increments.
-![](../../../../../Image-1%20(1).jpg)
+![](../../../../../images/Image-1%20(1).jpg)
 
 Wait, Did i say 'states on each day depending on the chocies of previous day.' ?
 If we are the current day 'i', we can choose what we need to do depending on what we did on the day 'i-1'.
@@ -47,7 +47,7 @@ By refering to few solutions, i quickly got to know we can divide up a unique so
 
 Now we have three states and their transitions.
 Then, we can set up some recursions depending on the current state while we take a possible max profit on the state.
-![](../../../../../Image-1.jpg)
+![](../../../../../images/Image-1.jpg)
 
 # 3. Solution
 
