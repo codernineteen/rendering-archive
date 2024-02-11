@@ -32,7 +32,7 @@ import tensorflow as tf
 
 # One-hot encoding
 map a number in certain colume to a column vector that has the number at the corresponded component location.
-![](../../../../Pasted%20image%2020240210175759.png) 
+![](../../../../images/Pasted%20image%2020240210175759.png) 
 
 - one-hot encoding in tensorflow
 ```python
