@@ -383,6 +383,57 @@ Color3(1, 1, 1) * 0.5 * (1 + std::sin(scale * p.z() + 10 * perlinNoise.turb(s)))
 and the result is
 ![](../../../images/Pasted%20image%2020240206210531.png)
 
+
+
+
+
+# Quadrilaterals
+
+A new geometry primitive - quadrilateral.
+
+Our implementation will be parallelogram technically and this is how to abstract to geometry :
+- $Q$ - the lower-left corner
+- $\vec{u}$ - a vector representing the first side
+- $\vec{v}$ - a vector representing the second side.
+
+![](../../../images/Pasted%20image%2020240209101911.png)
+$Q+\vec{u}+\vec{v}$ is equal to the opposite corner of parallelogram.
+
+Because quads are flat, they don't have volumes while they have area.
+To avoid numerical problem in ray intersection with quads, we need to add a little padding about the zero-sized dimension of bounding box.
+
+## ray - plane intersection
+
+A plane can be represented implicitly :
+$$Ax + By + Cz + D = 0$$
+If we move $D$ to the right side,
+$$Ax + By + Cz = D$$
+We can represent this in a more comact way
+$$\vec{n}\cdot\vec{v}=D$$
+, where $\vec{n} = (A, B, C)$ which is a normal vector of plane  and $\vec{v} = (x,y,z)$ which is a point on the plane.
+
+We represented a ray as :
+$$R(t) = P + td$$
+
+If we combine the two equations altogether,
+$$\vec{n}\cdot(P+t\vec{d})=D$$
+Then, we solve this equation against 't' ,
+$$t = \frac{D-\vec{n}\cdot P}{\vec{n}\cdot\vec{d}}$$
+
+This root gives us a point that is intersection on the plane. 
+If dot product between normal and ray direction is zero, that means ray direction is parallel to one of sides of the quadrilateral.
+
+We don't know two things yet.
+1. normal vector of plane
+	This can be computed easily by two sides of a plane.
+	We already know $u$ and $v$ which composes of the plane area.
+	Becase the two vector is aligned on a plane which is orthogonal to the normal vector, we can get a normal vector by doing cross product between u and v
+2. $D$
+	Back again to implicit plane equation,
+$$Ax + By + Cz = D$$
+	 we can replace (A,B,C) with a normal vector components and (x,y,z) with a corner Q of the plane.
+	 $$D = \vec{n}\cdot Q$$
+
 # Reference 
 - ray-tracing
 https://raytracing.github.io/books/RayTracingTheNextWeek.html#motionblur/puttingeverythingtogether
