@@ -434,9 +434,94 @@ $$Ax + By + Cz = D$$
 	 we can replace (A,B,C) with a normal vector components and (x,y,z) with a corner Q of the plane.
 	 $$D = \vec{n}\cdot Q$$
 
+# Lights
+
+Light is a key component of raytracing.
+To create a light source that has positions and size, we need to be able to take any regular object and **turn it into something that emits light**
+
+##
+emissive materials
+
+This material folows basic structure of material class abstraction.
+But the difference is that it can emit a ray color from a point on the surface.
+
+## background color
+From now on, we are going to handle light in scene with light sources. So we need to set the background color of scene to entirely black.
+
+- if there is no ray hit -> we return background color
+- if there is ray hit , but no scattering -> return emitted color only
+- otherwise, return emitted color + scattered color
+
+A result )
+![](../../../images/Pasted%20image%2020240212132901.png)
+
+
+
+## cornell box
+[What is cornell box?](https://en.wikipedia.org/wiki/Cornell_box)
+
+- Empty cornell box
+	- We can see a lot of noises here because light is so small relative to the size of room.
+![](../../../images/Pasted%20image%2020240212134130.png)
+
+Usually cornell box has two rotated boxes in the room.
+To achieve this, we need to do two things :
+
+- abstract the steps to create a cube into a function
+- instantiate
+	- *'instance'* : a copy of a geometric primitive that has been placed into the scene.
+	- For example, To make an effect of transaltion, we have two choices.
+		1. Based on the pink box, we add two to all its x components, then we get a cube at (3,1)
+		2. Just Leave the box where it is, but subtract two off the x-component of the ray origin during hit routine.
+	![](../../../images/Pasted%20image%2020240212134625.png)
+
+## Instance translation
+
+About ray hitting,
+- move backward ray origin as much as offset. (if the offset were negative, the direction of movement would be forward.)
+- check hit 
+- If there is a hit on surface, we add offset to get an actual hit point.
+
+About an instance,
+- we need to move original bounding box as much as offset.
+
+## Instance rotation
+1. change the ray from world space to object space
+2. check hit (if so, where)
+3. change intersectoion point from object space to world space
+
+For rotation about y-axis, we need to rotate a ray by $-\theta$ to transform its space into object space.
+$$x'=cos(\theta)\cdot x - sin(\theta)\cdot z$$
+$$z' = sin(\theta)\cdot x + cos(\theta)\cdot z$$
+
+
+
+
+
+
+
+
+# Volumes
+
+few of good features to add our ray tracer :
+- volumes (participating media)
+- subsurface scattering (ex. dense fog)
+
+A hack to implement volume is to make the volume with random surface.
+
+## constant density mediums
+
+ a ray can either scatter inside the volume or just penetrate the volume without any scattering.
+![](../../../images/Pasted%20image%2020240213164718.png)
+The denser the volume becomes, the more likely the ray scatter at any point.
+The probability that the ray scatters in any small distance $\Delta L$  is :
+$$p = C\cdot \Delta L$$
+,where $C$ is proportional to optical density of the volume.
+
+
 # Reference 
 - ray-tracing
-https://raytracing.github.io/books/RayTracingTheNextWeek.html#motionblur/puttingeverythingtogether
+	[_Ray Tracing: The Next Week_](https://raytracing.github.io/books/RayTracingTheNextWeek.html)
 
 - perline noise
 	- https://ko.khanacademy.org/computing/computer-programming/programming-natural-simulations/programming-noise/a/perlin-noise
