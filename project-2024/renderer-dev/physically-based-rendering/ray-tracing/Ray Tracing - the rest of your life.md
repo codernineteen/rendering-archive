@@ -214,7 +214,178 @@ The ray would appear inaccurately bright because it hadn't been dimmed by succes
 How can we remove this inaccuracy by downweighting those samples to adjust for the oversampling?
 For this, We need to understand what the 'probability density funciton' is first.
 
-##
+A density function is continuous version of a histogram.
+
+- histogram example
+![](../../../../images/Pasted%20image%2020240216102018.png)
+
+Based on above histogram, we can think of three possible cases.
+- more items , but same number of bins -> each bin has higher frequency
+- more items and more bins -> each bin has lower frequency
+- increase bins to infinity -> now we have an infinitie number of zero-frequency bins
+So If number of bins diverges to positive infinity, the probability of certain bin typically is zero. -> we need another representaiton.
+
+To solve for this, we can replace the histogram with a discrete density function.
+The difference between discrete function and discrete density function is that the latter one normalizes y-axis to a percentage of the total, which is called density.
+
+- Conversion from discrete function to discrete density function.
+$$Density \space of \space Bin \space i = \frac{n(bin_i)}{n(total)}$$
+, where $n(A)$  is the number of type A.
+Now we got a 'discrete' density function and we can convert this into 'continuous' density function.
+
+But how?
+A Density of Bin i is corresponded to a single bin.
+Then, we can take any two ranges between H and H' where H <= H'.
+If we divide up fraction of trees between height H and H' by the range, we can get a bin density against certain range.
+The choice of ranges are infinite, so we can represent this as continuous form.
+$$Bin\space Density=\frac{Fraction \space of \space trees \space between \space H \space and \space H'}{H-H'}$$
+
+Back again, the ratio of number of items in Bin i over total items can be considered as probability of bin i
+$$p(Bin_i)=\frac{n(Bin_i)}{n(total)}$$
+By combining density function and probability function altogether, we can get any likelihood that any given tree has a height that places within any arbitrary span of multiple bins :
+$$p=Bin \space Density\cdot(H-H')$$
+
+In short, a PDF is a continuous function that can be integrated over to determine how likely a result is over an integral.
+With given PDF $f_X(x)$
+$$\int_{-\inf}^{inf}f_X(x)dx=1$$
+$$P(a\le x \le b)=\int_{a}^{b}f_X(x)dx$$
+and the probability of a certain variable will always be zero.
+$$P(X=a)=P(a\le x \le a)=\int_{a}^{a}f_X(x)dx=0$$
+
+Again, Remeber that PDF only gives us a probability within an interval, not about single variable
+
+
+
+
+## 3.4 A Linear PDF example
+![](../../../../images/Pasted%20image%2020240219114404.png)
+- Remind that PDF is a probability function
+- area(p(r), 0, 2) = 1 (integral between 0 and 2)
+- $p(r) = C\cdot r$ , where  $p(r)$ is linear function and $C$ is arbitrary constant
+- Derivation for C :
+	$$1=area(p(r), 0, 2)$$
+	$$=\int_{0}^{2}C\cdot rdr$$
+	$$=C\int_{0}^{2}rdr$$
+	$$=C(\frac{2^2}{2}-\frac{0}{2})$$
+	Therefore,
+	$$C=\frac{1}{2}$$
+- $P(r|x_0 \le r \le x_1)$ is equal to
+	- $area(p(r), x_0, x_1)$
+	- $\int_{x_0}^{x_1}\frac{r}{2}dr$
+- $P(r=x) = 0 = \int_{x}^{x}p(r)dr$
+
+
+
+
+## 3.5 choosing samples
+
+PDF needs to find a best way to sample a scene so that we wouldn't get very bright pixels next to very dark pixels.
+
+- uniformly random sampling is inaccurate
+- Steering samples artifically also causes inaccurate result.
+
+Then How do we generate random samples with PDF?
+If our PDF is uniform over a domain `[0, 10]` , then we can generate a perfect sample like :
+`random_double() * 10.0`, where random_double generate a random number from uniform distribution ranged between 0.0 and 1.0.
+
+**But in most cases, our interest is non-uniform**.
+Assuming belows,
+- a distribution is defined by PDF
+- there is a uniform random number generator
+We need to find a way to convert the generator into non-uniform random number generator.
+
+
+Now let's assume that **there exists a function $f(d)$ that takes uniform random input and produces a non-uniform distribution weighted by PDF.**
+Back again to our linear PDF example, we know that the probability of certain interval will be high at near 2 than near zero.
+
+However what is the value that splits the probability in half? 
+In other words, what is the value that a random number has a 50% chance for intervals `[a, x]` and `[x, b]` where total range is `[a, b]`.
+
+We can solve this by following :
+$$50\%=\int_{0}^{x}\frac{r}{2}dr=\frac{r^2}{4}|^x_0=\frac{x^2}{4}$$
+$$\frac{x^2}{4}=0.5$$
+$$x=\sqrt{2}$$
+
+As an approximation, we can create a $f(d)$ which generates a number in `[0, sqrt(2)]` when d is less than 0.5 and a number in `[sqrt(2), 2]` when d is greater than 0.5.
+
+- Code 
+```cpp
+double f(double d)
+{
+	if(d <= 0.5)
+		return sqrt(2.0) * random_double();
+	else 
+		return sqrt(2.0) + (2.0-sqrt(2.0))*random_double();
+}
+```
+So we got a new distribution.
+![](../../../../images/Pasted%20image%2020240219121750.png)
+
+It is really easy to solve the intergration above in analytical way.
+But As being mentioned before, there will be functions that we don't and can't solve for the integrations.
+- an example that we don't want to solve analytically.
+	$$p(x)=e^{\frac{-x}{2\pi}}sin^2(x)$$
+![](../../../../images/Pasted%20image%2020240219122007.png)
+
+In this case, we need to solve it experimentally by making the result close to real value.
+
+A code to solve this in experimental way.
+```cpp
+
+struct sample {
+	double x;
+	double p_x;
+};
+
+// comparator for sorting by x in ascending order
+bool compared_by_x(const sample& a, const sample& b) {
+	return a.x < b.x;
+}
+
+int main() {
+	int N = 10000;
+	double sum = 0.0;
+
+	std::vector<sample> samples;
+	for (int i = 0; i < N; i++) {
+		auto x = random_double(0, 2 * pi);
+		auto sin_x = sin(x);
+		auto p_x = exp(-x / (2 * pi)) * sin_x * sin_x; 
+		sum += p_x;
+
+		sample current_sample = { x, p_x };
+		samples.push_back(current_sample);
+	}
+
+	std::sort(samples.begin(), samples.end(), compared_by_x);
+	double half_sum = sum / 2.0;
+	double halfway_point = 0.0;
+	double accum = 0.0;
+	for (int i = 0; i < N; i++) {
+		accum += samples[i].p_x;
+		if (accum >= half_sum) {
+			halfway_point = samples[i].x;
+			break;
+		}
+	}
+	std::cout << std::fixed << std::setprecision(12);
+	std::cout << "Average = " << sum / N << '\n';
+	std::cout << "Area under curve = " << 2 * pi * sum / N << '\n';
+	std::cout << "Halfway = " << halfway_point << '\n';
+}
+```
+
+I've shown only one partitioning. But we can do this recursively based on our choose for depth.
+1.  solve for halfway point of a PDF
+	1-1 Recurse into lower half, repeat step 1
+	1-2 Recurse into upper half, repeat step 1
+
+The main time complexity is depending on sorting algorithm whose best complexity is $O(n \log n)$ (quick sort.)
+
+There is a research for this topic : *Metropolis-Hastings algorithm*
+
+
+
 # Reference
  - This markdown was writtien entirely based on :
 	[_Ray Tracing: The Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
