@@ -384,8 +384,253 @@ The main time complexity is depending on sorting algorithm whose best complexity
 
 There is a research for this topic : *Metropolis-Hastings algorithm*
 
+## 3.6 Approximating distributions
+
+- Cumulative Distribution Function
+ex) $f(x) = e^{\frac{-x}{2\pi}}sin^2(x)$
+From 0 to $2\pi$ , the area under curve is equal to one(100%).
+From 0 to about 2.016(halfway point), the area under curve is 0.5(50%).
+
+Because we only take care about distribution between 0 and $2\pi$, any interval 'x' $\notin [0, 2\pi]$ is equal to zero. 
+
+By generalizing the CDF, we can represent it as a function $P(x)$.
+$$P(x) = \int_{-\infty}^{x}p(x')dx'$$
+or,
+$$P(x) =area(p(x'), -\infty, x)$$
+
+For summary,
+- PDF : a probability function that explains how likely an interval of numbers is to be chosen.
+- CDF : a distribution function that explains how likely all numbers smaller than its input is to be chosen.
+
+- PDF -> CDF : integrate PDF from $-\infty$ to x
+- CDF -> PDF : take derivative of CDF.
+
+Let's take an previous linear PDF example.
+If we take integral of the PDF, we can get CDF about some intervals.
+$$P(r) = \begin{cases}
+0 \space\space\space\space\space\space r<0\\
+\frac{r^2}{4} \space\space\space\space 0 \le r \le 2\\
+1 \space\space\space\space\space\space 2 < r\\
+\end{cases}$$
+With this example, $P(1) = 0.25$ means that any random variable from our PDF has a 25% chance of being 1 or lower.
+
+We want a function $f(d)$ to take a uniform distribution(0~1) and return a random value depending on a CDF '$P(r)$'.
+
+By aligning some cases, we can get a intuition for $f(d)$.
+- $f(0.25) = 1$ , any random value is less or equal to one with a 25% chance.
+- $f(0.5) = \sqrt{2}$ , any random value is less or equalt to $\sqrt{2}$ with a 50% chance.
+- Hence, $f(P(x)) = x$
+
+Although a CDF P(x) is accumulated til certain point, it still follows characteristics of probability,  "sum of probabilities is equal to 1".
+Then any interval defined in CDF will return a value between 0 and 1, we know that this value will be input of f(d).
+
+Finally f(d) takes an input 0~1 and it returns a certain value between 0~2 in the given case.
+
+We can represent f(d) in a more concise way by inversing P(x).
+$$f(P(x)) = x$$
+$$f(d)=P^{-1}(x)$$
+
+
+## 3.7 Importance sampling
+
+Example)
+$$I = \int_{0}^{2}x^2dx$$
+When we solved this using Monte carlo approach, we were implicitly using uniform PDF between 0 and 2. 
+- PDF = $\frac{1}{2}$ over te range $[0,2]$
+- $P(x) = \frac{x}{2}$ 
+- $f(d) = P^{-1}(x) = 2d(\because P(x) = d, \frac{x}{2}=d, x = 2d)$ 
+With above equations, we can use explicit PDF now.
+
+If we write down the approximation of Integration in code,
+```cpp
+double f(double d) {
+    return 2.0 * d;
+}
+
+double pdf(double x) {
+    return 0.5;
+}
+int main() {
+    int N = 1000000;
+    auto sum = 0.0;
+    for (int i = 0; i < N; i++) {   
+/*
+a sample of the function x^2 within the distribution [0,2]
+'f' is used to randomly select samples from this distribution
+*/    
+	    auto x = f(random_double());
+        sum += x*x / pdf(x);    
+    }
+}
+```
+
+In Monte carlo estimation example, we followed this equation :
+$$I = area(x^2, 0, 2) = (2-0)E(X)$$
+So in code,
+```cpp
+I = (b-a) * (sum / N);
+```
+where (sum / N) is expected value and (b-a) is target interval.
+
+However, we don't need to multiply the average by 2 anymore.
+We need to account for the nonuniformity of PDF of $x$.
+- The PDF will steer samples toward specific parts of the distribution, which will cause us to converge faster,but at the cost of introducing bias.
+- A bias in the scene causes inaccurately bright scene.
+- To reduce bias, 
+	- down-weight where we sample more frequently
+	- up-weight where we sample less frequently
+	Following above weighting rule, the weighting function should be proportional to $\frac{1}{pdf}$
+
+Now let's try to solve for the integral using 'a linear PDF($p(r) = \frac{r}{2}$)' which is not uniform.
+```cpp
+double f(double d) {
+	return sqrt(4.0 * d); // f(d) = P^-1(X) = sqrt(4d)
+}
+// non-uniform pdf
+double pdf(double x) {
+	return x / 2.0;
+}
+```
+
+A linear PDF is probably a better approximation for a quadratic function than a uniform PDF
+	-> we should try to make PDF match the integrand by tuning the PDF into a quadratic function.
+$$p(r)=\begin{cases} 
+0 \space\space\space\space\space\space\space\space\space\space\space\space r <0 \\
+C\cdot r^2 \space\space\space\space\space0 \le r \le 2\\
+0 \space\space\space\space\space\space\space\space\space\space\space\space 2 < r
+\end{cases}$$
+Integrating $p(r)$ from 0 to 2 should be 1 (i just skipped the integration)
+Then, $C = \frac{3}{8}$
+
+If we take an integral of PDF, we can get a CDF of the PDF.
+$$p(r)=\begin{cases} 
+0 \space\space\space\space\space\space\space\space\space\space\space\space r <0 \\
+\frac{3}{8}\cdot r^2 \space\space\space\space\space0 \le r \le 2\\
+0 \space\space\space\space\space\space\space\space\space\space\space\space 2 < r
+\end{cases}$$
+A CDF will be : $$P(r) = \frac{r^3}{8}$$
+A $f(d)$ is inverse of CDF :
+$$f(d) = 8d^{\frac{1}{3}}$$
+
+With a single sample, it returns perfectly exact answer.
+
+```cpp
+double f(double d) { return 8.0 * pow(d, 1.0/3.0); } 
+double pdf(double x) { return (3.0/8.0) * x*x; }
+
+int main() {    
+	int N = 1;    
+	auto sum = 0.0;
+    for (int i = 0; i < N; i++) {
+        auto x = f(random_double()));
+        sum += x*x / pdf(x);
+    }
+    std::cout << std::fixed << std::setprecision(12);
+    std::cout << "I = " << sum / N << '\n';
+}
+```
+
+In summary,
+- less noise in the place where the PDF is big
+- more noise where the PDF is small
+If we choose a PDF that is higher in the place that have more noise and is lower in the place that have less noise, the total noise will be reduced.
+-> we are steering our samples toward the parts of the **important** distribution.
+
+Using a carefully chosen non-uniform PDF == importance sampling.
+
+
+
+
+
+
+# 4. Monte Carlo Integration on the sphere of directions
+
+In the last chapter, we learned :
+- uniform random number
+- more complicated ways of producing random numbers
+- how to use them to generate random numbers of arbitrary distribution.
+
+The topcis are all relate to one-dimensional cases, but in real world application, we encounter higher-dimensional problems. 
+An important case of this in ray-tracing is producing random direction of ray.
+
+Our original approach was to generate a random vector and reject it if it exceeds bounds of unit-sphere. (**rejection method.**)
+
+Now we might have a PDF defined over two dimensions.
+ex)
+$$f(\theta, \phi) = cos^2(\theta)$$
+Using monte carlo integration, we should sample $cos^2(\theta)/p(r)$ , where the p(r) == p(direction).
+In terms of polar coordinates, it would be $p(\theta, \phi)$ whose integral is equal to one over the whole surface.
+
+Let's take an easy case first.
+We've already used `random_unit_vector` function to generate a unit direction in sphere a few times before.
+Then what's the PDF of this function?
+Because of this `random_unit_vector` is based on uniform random generator `random_double`, its pdf is $1/area = 1/4\pi$.
+
+an example )
+```cpp
+double f(const Vec3& d) {
+    auto cos_squared = d.z() * d.z();
+    return cos_squared;
+}
+
+double pdf(const Vec3& d) {
+    return 1 / (4 * pi);
+}
+
+int main() {
+    int N = 1000000;
+    auto sum = 0.0;
+    for (int i = 0; i < N; i++) {
+        auto d = random_unit_vector();
+        auto f_d = f(d); // use a function f to randomly select samples from within this distribution [0,2]
+        sum += f_d / pdf(d);
+    }
+    std::cout << std::fixed << std::setprecision(12);
+    std::cout << "I = " << sum / N << '\n';
+}
+```
+
+---
+
+- the way to represent a single direction in 3D is the related point on the unit sphere
+- About a range of directions, amount of area on the unit sphere that directions travel through.
+
+We have radians in $\theta$ over one dimension, now we have *steradians(sr)* in $\theta, \phi$ over two dimensions, which is called 'Solid Angle'
+Note that a sphere is a three-dimensional object, but its surface is only two-dimensional.
+
+A Solid angle '$\omega$' can be visualized as below :
+![](../../../../images/Pasted%20image%2020240222144033.png)
+$$\omega=\frac{A}{R^2}$$, where $A$ is a projected area.
+
+# 5. Light scattering
+It's time to understand light transport equation.
+
+## 5.1 albedo
+First question : Is the light absorbed?
+- probability of light being scattered : $A$
+- probability of light being absorbed : $1-A$ 
+, where $A$ means 'albedo' (whiteness)
+
+Albedo is used to define some form of 'fractional reflectance'.
+A fractional reflectance vary with
+- color
+- incident direction (the direction of incoming ray)
+
+By using this fractional reflectance, we want to simulate the movement of photons through a space.
+From basic Physics , we know the energy of a photon follows :
+$$E = \frac{hv}{c}$$, where $h$ is Planck constant, $v$ is frequency and  $c$ is a speed of light.
+
+Each individual photon has a tiny amount of energy, and **the absorption or scattering of a photon is probabilistically determined by the albedo of an object.**
+
+Albedo can depend on color because some objects are more likely to absorb some wavelengths.
+
+In most PBR renderers, we would use a predefined set of specific wavelengths for the light color (300nm, 350nm, 700nm and so on) than tristimulus RGB format.
+
+Human visual system has 3 unique sets of color receptors called 'cones'.
+Each of the cones are sensitive to different algebraic mixtures of wavelengths and the cones are referred to as long, medium and short cones.
 
 
 # Reference
  - This markdown was writtien entirely based on :
 	[_Ray Tracing: The Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
+
