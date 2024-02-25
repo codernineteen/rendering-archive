@@ -663,6 +663,33 @@ $$pScatter(...)=C\cdot cos(\theta_o)$$
 And we need to integrate $pScatter$ over whole surface. (Note that we ignore the incident direction whose angle against normal is lower than zero.)
 $$1= \int_{0}^{2\pi}\int_{0}^{\pi/2}C\cdot cos(\theta)dA$$
 
+The '$dA$' term can be derived by following this image.
+![](../../../../Pasted%20image%2020240225164845.png)
+By Subsituiting $dA$ term with above equation, we can solve the integral of scattering PDF :
+$$1= \int_{0}^{2\pi}\int_{0}^{\pi/2}C\cdot cos(\theta)sin(\theta)d\theta d\phi$$
+Skipping the intermediate steps, The integral of $cos(\theta_o)$ is over the hemisphere is $\pi$.
+$$1=C\cdot \pi$$
+Finally, we need to normalize the integral by $C = \frac{1}{\pi}$.
+
+In regard to Lambertian reflectance, the pdf only dependent on outgoing direction $w_o$. so we can simplify the parameter set as.
+$$pScatter(X, w_i, w_o, \lambda) = pScatter(w_o) = \frac{\cos(\theta_o)}{\pi}$$
+
+Let's assume that a pdf for randomly generated outgoing direction is equalt to $pScatter(w_o)$
+$$p(w_o)=pScatter(w_o)=\frac{\cos(\theta_o)}{\pi}$$
+Then we can simply outgoing color as :
+$$Color_o(X, w_o, \lambda)\approx\sum A(...)\cdot Color_i(...)$$
+Thanks to this assumption that two pdfs are same, this whole derivation is exactly same with a code we wrote before.
+```cpp
+return atteunation * ray_color(scattered, depth-1, world);
+```
+
+Standard reflection is defined by the *Bidirectional Reflectance Distribution Function*, shortly 'BRDF'
+$$BRDF(w_i, w_o, \lambda)=\frac{A(...)\cdot pScatter(...)}{\cos(\theta_o)}=\frac{A(...)\cdot (cos(\theta_o)/\pi)}{\cos(\theta_o)}$$
+Eventually The BRDF for a Lambertian surface :
+$$BRDF = A/\pi$$
+
+
+
 
 
 
