@@ -583,6 +583,8 @@ int main() {
     for (int i = 0; i < N; i++) {
         auto d = random_unit_vector();
         auto f_d = f(d); // use a function f to randomly select samples from within this distribution [0,2]
+//- If a sample `d` is more probable (i.e., has a higher pdf), dividing by that probability effectively reduces its contribution to the sum.
+//- If a sample `d` is less probable (i.e., has a lower pdf), dividing by that probability increases its contribution to the sum.
         sum += f_d / pdf(d);
     }
     std::cout << std::fixed << std::setprecision(12);
@@ -599,8 +601,8 @@ We have radians in $\theta$ over one dimension, now we have *steradians(sr)* in 
 Note that a sphere is a three-dimensional object, but its surface is only two-dimensional.
 
 A Solid angle '$\omega$' can be visualized as below :
-![](../../../../images/Pasted%20image%2020240222144033.png)
-$$\omega=\frac{A}{R^2}$$, where $A$ is a projected area.
+![](../../../../Pasted%20image%2020240225124743.png)
+$$\omega=\frac{A}{r^2}$$, where $A$ is a projected area.
 
 # 5. Light scattering
 It's time to understand light transport equation.
@@ -618,7 +620,7 @@ A fractional reflectance vary with
 
 By using this fractional reflectance, we want to simulate the movement of photons through a space.
 From basic Physics , we know the energy of a photon follows :
-$$E = \frac{hv}{c}$$, where $h$ is Planck constant, $v$ is frequency and  $c$ is a speed of light.
+$$E = \frac{hv}{\lambda}$$, where $h$ is Planck constant, $v$ is frequency and  $c$ is a speed of light.
 
 Each individual photon has a tiny amount of energy, and **the absorption or scattering of a photon is probabilistically determined by the albedo of an object.**
 
@@ -628,6 +630,40 @@ In most PBR renderers, we would use a predefined set of specific wavelengths for
 
 Human visual system has 3 unique sets of color receptors called 'cones'.
 Each of the cones are sensitive to different algebraic mixtures of wavelengths and the cones are referred to as long, medium and short cones.
+
+
+## 5.2 Light scattering
+
+Light scatters -> light has a directional distribution (this can be described as a PDF over solid angle)
+
+From now on, scattering PDF == *pScatter()*.
+- scattering PDF can vary with incident direction
+	- so $pScatter(w_i, w_o)$
+- Also, the pdf can vary with the wavelength of the light (ex. prism refracting white light into rainbow)
+	- $pScatter(w_i, w_o, \lambda)$
+- Finally, the pdf can depend on the scattering position.
+	- $pScatter(X, w_i, w_o, \lambda)$, where $X=(x,y,z)$
+- The albedo of an object can also depend on this quantities
+	- $albedo = A(X,w_i, w_o, \lambda)$
+
+The color of a surface is found by integrating these terms over the unit sphere by 'incident direction'.
+$$Color_o(x, w_o, \lambda)=\int_{w_i}A(X,w_i, w_o, \lambda)\cdot pScatter(X,w_i, w_o, \lambda)\cdot Color_i(x, w_i,\lambda)$$
+- albedo, pSacttering : works as filters to the light that is shining in the point.
+This is a recursive function, so 
+
+## 5.3 scattering PDF
+We know that we can't make the 'i' of $w_i$ go to infinity in computations.
+So here we can apply Monte carlo basic formula :
+$$Color_o(x, w_o, \lambda)\approx \sum\frac{A(...)\cdot pScatter(...)\cdot Color_i(...)}{p(X, w_i, w_o, \lambda)}$$
+, where $p$ is the PDF of whatever outgoing direction we randomly generate.
+
+For a Lambertian surface, $pScatter()$ can be replaced with cosine density.
+$$pScatter(...)=C\cdot cos(\theta_o)$$
+
+And we need to integrate $pScatter$ over whole surface. (Note that we ignore the incident direction whose angle against normal is lower than zero.)
+$$1= \int_{0}^{2\pi}\int_{0}^{\pi/2}C\cdot cos(\theta)dA$$
+
+
 
 
 # Reference
