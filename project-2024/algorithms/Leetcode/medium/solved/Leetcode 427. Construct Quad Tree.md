@@ -33,7 +33,7 @@ We can construct a Quad-Tree from a two-dimensional area using the following ste
 If you want to know more about the Quad-Tree, you can refer to the [wiki](https://en.wikipedia.org/wiki/Quadtree).
 
 ex)
-![](../../../../../Pasted%20image%2020240226142926.png)
+![](../../../../../images/Pasted%20image%2020240226142926.png)
 
 # Intuition
 
@@ -50,7 +50,7 @@ When we need to construct a quad tree, we only need to care the direct children 
 - time complexity : construct a quad is $2^x \times 2^ x = (2^2)^\alpha, \alpha=x$ . Hence, $O(x)$ and every time the different value is placed at last element it requires $O(len^2)$ 
 	- Eventually $O(len^2 \times x)$
 - space complexity : $O(x)$ 
-![](../../../../../Pasted%20image%2020240226143324.png)
+![](../../../../../images/Pasted%20image%2020240226143324.png)
 ```cpp
 /*
 // Definition for a QuadTree node.
