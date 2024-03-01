@@ -19,3 +19,14 @@ The service provides several things :
 	vkCmdCopyBuffer(commandBuffer, src, dest, 1, &copyRegion);
 	});
   ```
+
+# User
+
+- MKGraphicsPipeline
+	1. record 
+	2. begin/end single time commands 
+	3. submit buffer to queue 
+	4. reset
+
+- MKDevice
+	1. Initialize the GCommandService instance
