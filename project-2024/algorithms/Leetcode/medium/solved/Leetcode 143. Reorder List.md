@@ -1,4 +1,7 @@
 
+- #solved #medium #linked-list 
+- took 41 min to solve
+
 # 1. Problem description
 You are given the head of a singly linked-list. The list can be represented as:
 
