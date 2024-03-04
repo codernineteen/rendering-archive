@@ -37,7 +37,7 @@ To solve this problem in O(n) time complexity, i made up three neccessary traver
 2. Forward and reverse jumping insertion
 	With this visualization, we can see that we need to insert elements forward until we reach $L_n/2$ elements.
 	After we reach the last slot in the vector, then we start to insert elements in a reverse order by decrementing iterator two times at once.
-	![](../../../../../Pasted%20image%2020240303140643.png)
+	![](../../../../../images/Pasted%20image%2020240303140643.png)
 3. Make current node point to next elements in the vector
 	While iterating the vector, we need to make the current element point ot next node so that we can reorder linked-list appropriately.
 # 3. Solution
