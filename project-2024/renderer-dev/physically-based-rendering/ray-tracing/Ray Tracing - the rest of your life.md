@@ -601,7 +601,7 @@ We have radians in $\theta$ over one dimension, now we have *steradians(sr)* in 
 Note that a sphere is a three-dimensional object, but its surface is only two-dimensional.
 
 A Solid angle '$\omega$' can be visualized as below :
-![](../../../../Pasted%20image%2020240225124743.png)
+![](../../../../images/Pasted%20image%2020240225124743.png)
 $$\omega=\frac{A}{r^2}$$, where $A$ is a projected area.
 
 # 5. Light scattering
@@ -620,7 +620,7 @@ A fractional reflectance vary with
 
 By using this fractional reflectance, we want to simulate the movement of photons through a space.
 From basic Physics , we know the energy of a photon follows :
-$$E = \frac{hv}{\lambda}$$, where $h$ is Planck constant, $v$ is frequency and  $c$ is a speed of light.
+$$E = \frac{hv}{\lambda}$$, where $h$ is Planck constant, $v$ is frequency and  $\lambda$ is a wavelength.
 
 Each individual photon has a tiny amount of energy, and **the absorption or scattering of a photon is probabilistically determined by the albedo of an object.**
 
@@ -664,7 +664,7 @@ And we need to integrate $pScatter$ over whole surface. (Note that we ignore the
 $$1= \int_{0}^{2\pi}\int_{0}^{\pi/2}C\cdot cos(\theta)dA$$
 
 The '$dA$' term can be derived by following this image.
-![](../../../../Pasted%20image%2020240225164845.png)
+![](../../../../images/Pasted%20image%2020240229102649.png)
 By Subsituiting $dA$ term with above equation, we can solve the integral of scattering PDF :
 $$1= \int_{0}^{2\pi}\int_{0}^{\pi/2}C\cdot cos(\theta)sin(\theta)d\theta d\phi$$
 Skipping the intermediate steps, The integral of $cos(\theta_o)$ is over the hemisphere is $\pi$.
@@ -689,11 +689,228 @@ Eventually The BRDF for a Lambertian surface :
 $$BRDF = A/\pi$$
 
 
+---
 
 
 
+# 6. Apply Importance Sampling 
+
+Now we want to send a bunch of extra rays toward right sources using a 
+PDFs.
+Let' assume some PDFs
+- $pLight(w_o)$
+- $pScatter(w_o)$
+- $pSurface(w_o)$ - a PDF related to $pScatter(w_o)$
+
+One of good things of PDF is that we can mix some of PDFs to form **mixture densities that are also PDFs**.
+
+- ex)$$p(w_o)=\frac{1}{2}pSurface(w_o)+\frac{1}{2}pLight(w_o)$$
+However, this fact is only kept when the weights of mixing equation are positive and add up to one. (in above example, weights are '$1/2, 1/2$' and they add up to one.)
+
+Our mission is to figure out how to make the PDF larger where the product $pScatter(X,w_i, w_o)\cdot Color_i(X,w_i)$ is largest.
+- For diffuse surfaces, By following the cosine law, the guessing where $Color_i$ is the largest is equivalent to guess where the most light is coming from.
+- For mirror-like surfaces (nearly ideal specular reflection) , $pScatter$ matters more.
+
+Now let's add scattering PDF in our code base and apply it into lambertian material.
+
+```cpp
+    double scattering_pdf(const ray& r_in, const hit_record& rec, const ray& scattered) const {
+        auto cos_theta = dot(rec.normal, unit_vector(scattered.direction()));
+        return cos_theta < 0 ? 0 : cos_theta/pi; // avoid pdf become zero
+    }
+```
+
+```cpp
+Color3 ray_color(const Ray& r, int depth, const Hittable& world) const {
+	if (depth <= 0)
+		return Color3(0, 0, 0);
+
+	HitRecord rec;
+	if (!world.hit(r, Interval(0.001, infinity), rec))
+		return background;
+
+	
+	Ray scattered;
+	Color3 atteunation;
+	Color3 color_from_emission = rec.mat->emitted(rec.u, rec.v, rec.p);
+
+	if (!rec.mat->scatter(r, rec, atteunation, scattered))
+		return color_from_emission;
+
+	double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
+	double pdf = scattering_pdf; 
+	Color3 color_from_scatter = (attenuation * scattering_pdf * ray_color(scattered, depth-1, world)) / pdf; // (A() * pScatter() * C) / pdf
+	
+	return color_from_emission + color_from_scatter;
+}
+```
+
+
+## 6.3 Random Hemispherical sampling
+
+If we take another scattering distribution that changes material property, we get slightly different result.( for example, more noisy image and inaccurate color on the surface)
+
+Here's the cases :
+- If we are not sure what the best sampling pattern is for our material, it may be a good choice to try uniform PDF.
+
+In another perspective, this gives us an issue that we need to handle.
+Because a bug in Monte carlo program is one of the most difficult thing to debug , we need some infrastructure to prevent it.
+
+# 7. Generating random directions
+
+## 7.1 random directions relative to the z-axis
+
+- how to generate a random direction with inversion method?
+	Let's assume that the normal of a surface is same with 'z-axis' and $\theta$ is the angle from normal.
+	With a given Directional PDF on the sphere($p(w) = f(\theta)$), the 1-D PDFs on $\theta$ and $\phi$ are :
+	$$a(\phi) = 1/2\pi$$
+$$b(\theta)=2\pi f(\theta)\sin(\theta)$$
+	Then, we can solve for the CDF of $\theta$ and $\phi$ from uniformly generated numbers $r_1, r_2$.
+	- $$r_1 = \int_{0}^{\phi}a(\phi')d\phi'=\phi/2\pi$$
+		Therefore, $\phi = r_1\cdot2\pi$ (a uniformly generated random number $r_1$ is ranged between 0 and 1, so by multiplying $2\pi$, we expand the result to cover full range of $\phi$)
+	- $$r_2=\int_{0}^{\theta}b(\theta')d\theta'=2\pi f(\theta')sin(\theta')d\theta'$$
+		 Let's assume that $f(\theta')=\frac{1}{4\pi}$, which is uniform density on the sphere.
+		 Then ,
+		 $$r_2=\frac{1-cos(\theta)}{2}, cos(\theta)=1-2r_2$$
+	Ok, now we get the $\phi, cos(\theta)$ (we don't solve for $\theta$ because we just need to know cosine of it.)
+	To generate a unit vector direction toward($\theta$, $\phi$), we convert to Cartesian coordinates :
+	$$x=cos(\phi)\cdot sin(\theta), y=sin(\phi)\cdot sin(\theta), z=cos(\theta)$$
+	Because we didn't solve for the $\theta$ , we can't know what the value of $sin(\theta)$ directly. But we can use this rule instead
+	$$cos^2(\theta)+sin^2(\theta)=1$$
+
+## 7.2 uniform sampling a Hemisphere
+
+In the hemi-sphere case with uniform sampling, we can use $p(w)=f(\theta)=\frac{1}{2\pi}$.
+Then, $$cos(\theta) = 1-r_2$$To solve for $f(\theta) = cos^3(\theta)$ , we just need to follow the monte carlo approach with PDF that we already did before.
+
+## 7.3 cosine sampling a hemisphere
+At this time, let's think about a PDF $$p(w)=f(\theta)=cos(\theta)/\pi$$, which is non-uniform.
+
+By skipping all the steps to convert a generated direction against ($\theta, \phi$) into Cartesian coordinates,
+We will get :
+$$x = cos(2\pi r_1)\sqrt{r_2}, \space y=sin(2\pi r_1)\sqrt{r_2}, \space z = \sqrt{1-r_2}$$
+
+To integrate samples,
+1. create random cosine direction represented in Cartesian coordinates
+2. By extracting 'z' component of the vector, compute $cos^3$ and its pdf
+
+# 8. Orthonormal bases
+
+From now on, we only took care of generating random directions relative to z-axis to make the concept simple.
+However in real world application, we need to take care of this generation relative to surface normal.
+
+## 8.1 Relative Coordinates.
+Definition of Orthonormal basis 
+	a collection of three mutually orthogonal unit vectors. This is a strict subtype of coordinate system.
+
+The orthonoraml basis defines how distances and orientations are represented in the space.
+But the orthonormal basis alone is not enough. To explain its displacement in the space, we always need Origin of the space.
+
+Hence, we can represent a location like below :
+$$Location = O' + u\text{u} + v\text{v} + w\text{w}$$, where $O'$ is origin in the coordinate system, ($u, v, w$)  coefficients are distance and ($\text{u},\text{v},\text{w}$) are basis.
+
+## 8.2 Generate Orthonormal bases
+We need to generate random directions with a set distribution relative to the surface normal vector.
+For this, we only need direction because the direction is relative and has no specific origin.
+We need two cotangent vectors that are perpendicular to surface normal and the two vectors are perpendicular to each other.
+![](../../../../images/Pasted%20image%2020240304145724.png)
+
+Suppose that any vector $\vec{a}$ (nonzero length, nonparallel to normal $\vec{n}$), Then we can generate cotangent vectors by using cross product.
+$$\vec{S} = \vec{a}\times\vec{n}, \space\space \vec{s}=\frac{\vec{S}}{\lvert \vec{S}\rvert}$$
+$$\vec{t}=\vec{s}\times\vec{n}$$ 
+The problem is that we may not have an arbitrary vector $\vec{a}$.
+In the case, we can pick an arbitrary axis and check to see if it's parallel to $\vec{n}$.
+
+$\vec{n}$ is a normal of surface and it is unit-length vector at the same time by its definition.
+So If one of component is close to -1 or 1 , that means the normal vector is nearly aligned with the axis corresponding to the component. 
+```cpp
+if(fabs(n.x()) > 0.9) // if absolute value of x component is greater than 0.9 , the normal nearly aligned with x-axis.
+	a = vec3(0,1,0);
+else
+	a = vec3(1,0,0);
+```
+Then do cross products to get two cotangent vectors by following the equations above.
+
+## 8.3 Update scatter function
+
+- Lambertian material
+```cpp
+bool scatter(
+    const ray& r_in, const hit_record& rec, color& alb, ray& scattered, double& pdf) const override {        
+        OrthonormalBasis uvw;
+        uvw.build_from_w(rec.normal); // build the bases by surface normal
+        // get a direction depending on the basis.
+        auto scatter_direction = uvw.local(random_cosine_direction());            scattered = ray(rec.p, unit_vector(scatter_direction), r_in.time());
+        alb = albedo->value(rec.u, rec.v, rec.p);
+        // Now dot product between surface normal and a direction represent by orthonormal basis.        
+        pdf = dot(uvw.w(), scattered.direction()) / pi;        
+        return true;
+    }
+```
+
+# 9. Sampling Lights directly
+
+As we already know, uniform sampling has a problem it may sample unimportant or any arbitrary direction.
+
+Instead, we can use a PDF that sends more rays to the light (steering random directions toward light).
+
+An easy way to pick a random direction toward light is that pick a random point on the light and compute a direction from origin to the random point.
+
+For this, we need PDF $p(w)$ not to bias our render.
+
+## 9.1 Getting the PDF of a light
+
+With a given points $p$ and $q$, 
+- the probability of sampling $dA$ : $p_q(q)\cdot dA$ 
+- the probability of sampling differential area $dw$ on the sphere : $p(w)\cdot dw$ 
+- geometric relationship between $dw$ and $dA$ (solid angle relationship)
+	$$dw = \frac{dA\cdot cos(\theta)}{distance^2(p,q)}$$
+	![](../../../../images/Pasted%20image%2020240305135332.png)
+- the probability of sampling $dw$ and $dA$ must be the same, 
+	$$p(w)dw = p_q(q)dA$$
+	$p_q(q)$ is a uniform PDF , which is $1/A$
+	Hence,
+	$$p(w)\cdot \frac{dA\cdot cos(\theta)}{distance^2(p,q)}=\frac{dA}{A}$$
+	$$p(w) = \frac{distance^2(p,q)}{cos(\theta)\cdot A}$$
+This image shows the situation we take care right now.
+![](../../../../images/Pasted%20image%2020240305131716.png)
+
+## 9.2 Light sampling
+Let's apply the above derivations in the application code.
+```cpp
+	ray scattered;
+    color attenuation;        
+    double pdf;        
+    color color_from_emission = rec.mat->emitted(rec.u, rec.v, rec.p);
+    
+	if (!rec.mat->scatter(r, rec, attenuation, scattered, pdf))
+		return color_from_emission;
+
+	auto on_light = point3(random_double(213,343), 554, random_double(227,332)); // hard-coded random pointer on light
+	auto to_light = on_light - rec.p; // a direction from hit point to light
+	auto distance_squared = to_light.length_squared(); // length of the vector from p to q
+	to_light = unit_vector(to_light); // normalize the direction vector.
+
+    if (dot(to_light, rec.normal) < 0) // if dot product under horizon, don't care scattering
+        return color_from_emission;
+
+	// random value range is 213~343, 227~332. -> get a differential area
+	double light_area = (343-213)*(332-227); 
+	auto light_cosine = fabs(to_light.y());
+	if (light_cosine < 0.000001)
+		return color_from_emission;
+
+	pdf = distance_squared / (light_cosine * light_area);
+	scattered = ray(rec.p, to_light, r.time());
+
+	double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
+```
+
+## 9.3 Swithcing to undirectional light
+By setting back face color as black, we can reduce unneccessary noisy around light source.
 
 # Reference
  - This markdown was writtien entirely based on :
 	[_Ray Tracing: The Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
-
+- differential unit area equation image
+	[pbr-book.4ed](https://www.pbr-book.org/4ed/Radiometry,_Spectra,_and_Color/Working_with_Radiometric_Integrals)
