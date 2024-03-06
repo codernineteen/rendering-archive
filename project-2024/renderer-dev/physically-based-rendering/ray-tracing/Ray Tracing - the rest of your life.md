@@ -909,6 +909,89 @@ Let's apply the above derivations in the application code.
 ## 9.3 Swithcing to undirectional light
 By setting back face color as black, we can reduce unneccessary noisy around light source.
 
+
+# 10. Mixture densities
+
+- Combine a pdf for $cos(\theta)$ and a pdf for sampling togeter.
+
+
+## 10.1 abstractions for PDF
+we have two pdf obviously :
+- one for surface
+- one for light
+
+We've had a pdf that takes a direction and makes an output based on its distribution.
+In general, If we can know the distribution of randomly generated directions, we should use a PDF with the same distribution for fastest convergence.
+
+The pdf class will do
+1. returning a random direction weighted by the internal PDF distribution
+2. returning the corresponding PDF distribution value in that direction.
+
+- cosine pdf
+```cpp
+class cosine_pdf {
+  public:
+// build Orthonormal basis based on the surface normal
+    cosine_pdf(const vec3& w) { uvw.build_from_w(w); }
+
+// return a value generated in same distribution.
+    double value(const vec3& direction) const override {
+        auto cosine_theta = dot(unit_vector(direction), uvw.w());
+        return fmax(0, cosine_theta/pi);
+    }
+// generate a random cosine direction represented in local coordinate system
+    vec3 generate() const override {
+        return uvw.local(random_cosine_direction());
+    }
+
+  private:
+    onb uvw;
+};
+```
+usage in `ray_color`
+```cpp
+double pdf_val;
+color color_from_emission = rec.mat->emitted(r, rec, rec.u, rec.v, rec.p);
+if (!rec.mat->scatter(r, rec, attenuation, scattered, pdf_val))
+    return color_from_emission;
+
+	cosine_pdf surface_pdf(rec.normal);
+	scattered = ray(rec.p, surface_pdf.generate(), r.time());
+	pdf_val = surface_pdf.value(scattered.direction());
+	double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
+
+	// by following the color equation against incident ray and outgoing direction.
+	color color_from_scatter = (attenuation * scattering_pdf * ray_color(scattered, depth-1, world)) / pdf_val;
+```
+
+
+- additional functions for hittable objects
+	The implementation is following the exact equations being shown in section 9
+```cpp
+double pdf_value(const point3& origin, const vec3& v) const override {
+	hit_record rec; 
+	if (!this->hit(ray(origin, v), interval(0.001, infinity), rec))
+		 return 0; 
+	auto distance_squared = rec.t * rec.t * v.length_squared(); 
+	auto cosine = fabs(dot(v, rec.normal) / v.length()); 
+	return distance_squared / (cosine * area); 
+} 
+	
+vec3 random(const point3& origin) const override { 
+// uniformly generated random point on quadrilaterals.
+	auto p = plane_origin + (random_double() * axis_A) + (random_double() * axis_B); 
+	return p - origin; 
+}
+```
+
+## 10.3 The mixture PDF class
+We can create any linear mixture of any PDFs to form mixture densities that are also PDFs.
+$$pMixture = w_1\cdot p_1 + w_2\cdot p_2 + ... + w_n\cdot p_n$$
+$$w_1 + w_2 + ... + w_n = 1$$
+
+
+
+
 # Reference
  - This markdown was writtien entirely based on :
 	[_Ray Tracing: The Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
