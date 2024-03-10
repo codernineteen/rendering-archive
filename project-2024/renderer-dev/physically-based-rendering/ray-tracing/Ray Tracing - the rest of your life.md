@@ -990,6 +990,92 @@ $$pMixture = w_1\cdot p_1 + w_2\cdot p_2 + ... + w_n\cdot p_n$$
 $$w_1 + w_2 + ... + w_n = 1$$
 
 
+# 11. architectural decisions
+
+In this series, the author used mixture-density approach instead of shadow rays.
+
+- traditional shadow rays approach
+	- still can see in most professional path tracers (with predefined number of shadow rays)
+	- send terminal shadow rays to random lights to **determine** if the intersecion is lit by random lights or completely in shadow.
+		-> After the rays terminate either at a light or at an occluding surface, the initial path tracing ray continues on
+	- more cheaper than mixture-density and is becoming incresingly common in realtime.
+	
+- mixture-density approach
+	- rays that check for unobstructed path from an intersection point to a given light source
+	- can sample windows or bright parts under door that we may think important.
+
+Also, we need to remove hard-coded PDF construction in `ray_color`.
+- we can skip $f()/p()$ by making specular reflection 
+- or set surface roughness to a very small(but nonzero) -> almost mirror-like reflection
+
+Additionally, if we want to add an environment maps, we need to normalize RGB to floating point between 0 and 1 which is represented in 0~255 bytes in current implementation.
+
+Finally, a more physically based renderer requires a color format as spectral colors and maybe polarization rather than simple RGB. (definitely more difficult to implement.)
+
+# 12. cleaning up PDF management
+
+We've only had so far :
+- pdf related to the shape of the light
+- pdf related to the normal vector and type of surface
+
+now we need to add :
+- information about the light (to ask `material` function for a PDF)
+- information about if the scattered ray is specular 
+
+## 12.1 diffuse vs specular
+
+There is a kind of material that has two different material properties : partially ideal specular and partially diffuse.
+
+For simplicity, we can have the material randomly decide whether it is diffuse or specular.
+- we need to be careful when we ask for the PDF value based on the choice among diffuse or specular surface.
+- Then, let `ray_color` function know whether the ray is diffuse or specular.
+
+Let's add new record abstraction : `scatter_record`
+```cpp
+class scatter_record {
+public:
+	Color atteunation;
+	shared_ptr<pdf> pdf_ptr;
+	bool skip_pdf;
+	Ray skip_pdf_ray;
+}
+```
+
+By using this record abstraction, we can make the lambertial scattering simpler
+```cpp
+bool scatter(const ray& r_in, const hit_record& rec, scatter_record& srec) const override { 
+// update scatter record.
+	srec.attenuation = albedo->value(rec.u, rec.v, rec.p); 
+	srec.pdf_ptr = make_shared<cosine_pdf>(rec.normal); 
+	srec.skip_pdf = false; 
+	return true; 
+}
+```
+
+For more detailed code, refer to the book.
+
+Then we can modify specular scattering :
+```cpp
+bool scatter(const ray& r_in, const hit_record& rec, scatter_record& srec) const override { 
+	srec.attenuation = albedo; 
+	srec.pdf_ptr = nullptr; 
+	srec.skip_pdf = true; 
+	vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+	srec.skip_pdf_ray = ray(rec.p, reflected + fuzz*random_in_unit_sphere(), r_in.time()); 
+	return true; 
+}
+```
+
+
+## 12.3 sampling a sphere object
+
+For the metal-like material, we are just skipping the PDF right now.
+But we would also want a PDF to reduce noise created by reflections on metal material.
+
+Because it is quite diffcult to make a PDF for a block, we would implement it for sphere just for now.
+
+
+
 
 
 # Reference

@@ -1,5 +1,5 @@
 
-# Installation & Building source
+# Step 1 - Installation & Building source
 
 My renderer engine implementation is based on Vulkan-API currently.
 However I wanted to support DX12 backend for my renderer engine after i learned it in the future.
@@ -46,7 +46,7 @@ It tells me that the output binary was made in Debug ouput path as above.
 My last step was to implement build pipeline for converting HLSL to SPIR-V and to check if it works with simple triangle drawing.
 
 
-# Build commands in Cmakelists
+# Step 2 - Build commands in Cmakelists
 
 I wrote down below cmake commands in my Cmakelists.txt
 Although it would be much better to use reusable function about uncessary duplicated part, I didn't want to encounter any other errors that i don't know anymore.
@@ -103,7 +103,7 @@ add_dependencies(${CMAKE_PROJECT_NAME} Shaders) # add shader buld as a dependenc
 ```
 
 
-# Writing actual hlsl shader code.
+# Step 3 - Writing actual hlsl shader code.
 
 To draw a simple triangle, i was using these vertex and fragment shader codes.
 - vertex shader
@@ -188,7 +188,7 @@ float4 main(PSInput input) : SV_Target
 ```
 
 
-# 4. The result
+# 4. Step 4 - The result
 
 After i put a lot of efforts for this setup, i got this desirable result !
 ![](images/Pasted%20image%2020240219201753.png)
