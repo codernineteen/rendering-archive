@@ -43,7 +43,7 @@ Basically, there are three possible visualization.
 1. montonically increasing slope
 2. intermediat peak
 3. montonically decreasing slope
-![](../../../../../Pasted%20image%2020240307131309.png)
+![](../../../../../images/Pasted%20image%2020240307131309.png)
 
 We can detect whether it is a peak or not for case 1, 3 with conditional statements right away.
 So we just need to implement an algorithm to find a peak the case when a peak is placed at middle of the array.
@@ -59,7 +59,7 @@ If not, we have two different cases.
 For the decreasing case, we need to update high index as middle.
 For the increasing case, we need to update low index as middle.
 As a result, thanks to nature of binary search , our middle position will find a proper peak position by moving the slope zig-zag way.
-![](../../../../../Pasted%20image%2020240307131859.png)
+![](../../../../../images/Pasted%20image%2020240307131859.png)
 
 # 3. Solution
 - time complexity : $O(\log{n})$
