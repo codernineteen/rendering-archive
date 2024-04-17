@@ -88,7 +88,7 @@ To be efficient $\hat{p}$ should tightly bound to $\hat{q}$
 For example, if we choose $w(x_j) = \frac{\hat{q}(x_j)}{p(x_j)}$ , resulting samples will be approximately distributed according to $\hat{q}$.
 
 The more number of M increases, the more the distribution of each sample approaches $q$.
-![](../../../../Pasted%20image%2020240314115659.png)
+![](../../../../images/Pasted%20image%2020240314115659.png)
 
 Importance resampling usage in global illumination literatures.
 - decrease number of visibility tests necessary in bidirectional path tracing
@@ -180,6 +180,8 @@ Here are some of variance reduction techniques.
 
 # 4. Resampled Importance sampling
 
+## 4.1 introduction to RIS
+
 - robust variance reduction technique.
 - no prior required. 
 	-> this property of RIS makes it more robust than standard importance sampling that required priori knowledge of the integrand.
@@ -216,3 +218,38 @@ The basic steps of RIS
 For RIS to be unbiased , Below two conditions should be satisfied.
 - sampling density $\hat{q}$ and proposal density $p$ must be greater than zero everywhere that $f$ is non-zero.
 - $M,N$ must be greater than zero.
+
+### RIS algorithm
+1. Generate M proposals ($M \ge 1$) from the source distribution $p$, {$x_1,...,x_M$}
+2. Compute a weight for each proposal, $w(x_j)=\frac{\hat{q}(x_j)}{p(x_j)}$
+3. Draw N samples, {$y_1, ...,y_N$} with replacement from the proposals with probability proportional to the proposal weights.
+4. Estimate the true integral $I$ with below equation$$I_{ris}=\frac{1}{N}\sum_{i=1}^{N}\frac{f(y_i)}{\hat{q}(y_i)}\cdot\frac{1}{M}\sum_{j=1}^{M}w(x_j)$$
+There is a problem in basic RIS.
+-> while sampling importance resampling, it is possible to choose same proposals multiple times.
+-> this repeated proposals doesn't give any additional information.
+
+one of good solutions is to stratify the proposals. (section 4.5)
+
+
+## 4.2 Variance analysis
+
+RIS variance is composed of two standard Monte carlo variance terms.
+1. the variance of $p$
+2. the variance of $q$
+If $M -> \infty$ , the contribution of the variance of $p$ to total variance goes to zero because SIR generates samples that have only the density $q$.
+
+RIS has an additional degree of freedom, which is a parameter 'M'.
+This flexibility can lead to addtional variance reduction when below two conditions are met.
+1. the distribution of $q$ mimics better than $p$. ($V(f(Y)/q(Y)) < V(f(X)/q(X))$)
+2. computing proposals should be more efficient than evaluating the samples. If not, we'd better to simply compute more samples.
+
+
+## 4.3 robust parameter selection
+- parameters : $p, \hat{q}, M, N$ 
+- The proper selection of parameters within the unbiasedness constraints can reduce variance.
+
+Three guidelines for choosing $p, \hat{q}$
+1. minimize $V(f(Y)/q(Y)), V(f(X)/p(X))$
+2. $V(f(Y)/q(Y)) < V(f(X)/p(X))$
+3. a $q$ that is easy to evaluate and $p$ that is easy to sample.
+
