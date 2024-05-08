@@ -42,3 +42,18 @@ layout(push_constant) uniform nameOfOtherBlockHere
   uvec2 imageResolution;
 }
 ```
+
+
+# GLSL_EXT_ray_query
+
+To initialize ray query extension, we call `rayQueryInitializeExt` with
+- ray query object
+- TLAS
+- ray flags (enables us to customize or speed up the search for intersections)
+- 8-bit ray mask
+	a ray can only intersect the instance if one bit is set on the same position of both ray mask and instance mask.
+- ray origin
+- minimum and maximum `t` value
+- ray direction
+
+Then, call `rayQueryProceedEXT` while updating committed intersection (the closest intersection so far.)
