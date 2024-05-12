@@ -81,13 +81,13 @@ Note that p(x) must not be zero in this case.
 
 Variance in Monte carlo estimator is important to justify its use.
 a few of properties of variance below:
-![](../../../images/Pasted%20image%2020240111164716.png)
-![](../../../images/Pasted%20image%2020240111164902.png)
-![](../../../images/Pasted%20image%2020240111164908.png)
+![](../../../../images/Pasted%20image%2020240111164716.png)
+![](../../../../images/Pasted%20image%2020240111164902.png)
+![](../../../../images/Pasted%20image%2020240111164908.png)
 
 If the estimator is a sum of independent random variables
 -> the variance of sum is the sum of individual random variables' variances.
-![](../../../images/Pasted%20image%2020240111165040.png)
+![](../../../../images/Pasted%20image%2020240111165040.png)
 This equation shows us that variance decreases linearly with the number of samples n.
 The error in a Monte Carlo estimate only goes down at a rate of $O(n^{-\frac{1}{2}})$
 
@@ -120,12 +120,12 @@ Ex)
  ## Mean Square Error
  - F : true value
  - integral of f(x) : value from estimator.
- ![](../../../images/Pasted%20image%2020240111174616.png)
+ ![](../../../../images/Pasted%20image%2020240111174616.png)
  - for unbiased estimator, MSE is equal to the variance
  - otherwise, sum of variance and the squared bias of the estimator.
 
 If an accurate estimate of the integral $\tilde F \approx \int f(x)dx$  can be computed, then the mean squared error can be estimated by :
-![](../../../images/Pasted%20image%2020240114174320%201.png)
+![](../../../../images/Pasted%20image%2020240114174320%201.png)
 
 
 # Monte Carlo Integration : Improving Efficiency
@@ -143,7 +143,7 @@ A classic and effective techniqued for variance reduction is based on the placem
 
 - a stratified sampling
 	'decomposes' integration domain into regions and 'places' samples in each regions.
-	![](../../../images/Pasted%20image%2020240115222835%201.png)
+	![](../../../../images/Pasted%20image%2020240115222835%201.png)
 	,where union of each regions cover the original domain.
 	
 
@@ -152,20 +152,20 @@ A pixel is divided into a $k \times k$ grid.
 a sample is drawn uniformly within each grid cell. (this prevents the sample locations from being clumped)
 
 Within a single stratum, the monte carlo estimate is
-![](../../../images/Pasted%20image%2020240115223632%201.png)
+![](../../../../images/Pasted%20image%2020240115223632%201.png)
 Where $X_{i,j}$ is the jth sample drawn from density $p_i$.
 
 The overal estimate is $F=\sum_iv_iF_i$ , where $v_i$ is the fractional volume of stratum i. 
 
 - True value of the integrand in stratum i 
-![](../../../images/Pasted%20image%2020240115223917%201.png)
+![](../../../../images/Pasted%20image%2020240115223917%201.png)
 - the variance in this stratum is 
-![](../../../images/Pasted%20image%2020240115224021%201.png)
+![](../../../../images/Pasted%20image%2020240115224021%201.png)
 
 Hence, the variance of the per-stratum estimator $\sigma^2/n_i$ with $n_i$ samples in the stratum.
-![](../../../images/Pasted%20image%2020240115224453%201.png)
+![](../../../../images/Pasted%20image%2020240115224453%201.png)
 If we assume $n_i$ is proportional to the volume $v_i$, then we have $n_i=v_in$ and above variance will be
-![](../../../images/Pasted%20image%2020240115224659%201.png)
+![](../../../../images/Pasted%20image%2020240115224659%201.png)
 
 To compare this variance with a method without stratification,
 Choosing an unstratified sample ==
@@ -173,7 +173,7 @@ Choosing a random stratum I according to the discrete probability distribution( 
 +
 choosing a random sample X in the stratum I. 
 -> trivially choosing X is conditional propability
-![](../../../images/Pasted%20image%2020240115225602%201.png)
+![](../../../../images/Pasted%20image%2020240115225602%201.png)
 where $Q$ is the mean of $f$ over the whole integrand domain.
 
 Two things to notice about above equation :
@@ -193,11 +193,11 @@ Monte carlo estimator converges more quickly **if the samples are taken from a d
 
 Let's see why the distributions reduce error.
 When $p(x)$ is proportional to $f(x)$ ( $p(x) = cf(x)$ ), Normalization of the PDF requires :
-![](../../../images/Pasted%20image%2020240116111956%201.png)
+![](../../../../images/Pasted%20image%2020240116111956%201.png)
 -> p(x) = a probability with which f(x) comes out from integration of f(x). 
 
 Although this requires that we know the value of the integral, if we could sample from this distribution, each term of the sum in the estimator would have the value
-![](../../../images/Pasted%20image%2020240116112545%201.png)
+![](../../../../images/Pasted%20image%2020240116112545%201.png)
 
 It is unreasonable because we would not use monte carlo method if we could integrate f directly.
 -> But if a density $p(x)$ can be found that is similar in shape to $f(x)$, variance reduced.
@@ -217,7 +217,7 @@ This situation is common in the integrals involved with 'light transport'. (prod
 Let's assume we have two sampling distributions $p_a$ and $p_b$ that match distributions of $f_a$ and $f_b$ exactly.
 Following monte carlo equation,
 - draw samples using $p_a$ and the estimator will be
-![](../../../images/Pasted%20image%2020240116115213%201.png)
+![](../../../../images/Pasted%20image%2020240116115213%201.png)
 The variance of this estimator is proportional to the variance of $f_b$.
 In the opposite case that we draw samples using $p_b$, this fact is kept true.
 
@@ -226,16 +226,16 @@ The idea is to draw samples from multiple sampling distributions when estimating
 **MIS provides a method to weight the samples from each technique that can eliminate larage variance spikes due to mismatches between the integrand's value and the sampling desnity.**
 
 With two sampling distributions $p_a$ and $p_b$ and a single sample taken from each one , MIS monte carlo estimator is
-![](../../../images/Pasted%20image%2020240116115932%201.png)
+![](../../../../images/Pasted%20image%2020240116115932%201.png)
 where $w_a$ and $w_b$ are weighting functions chosen that the expected value of this estimator is the value of the integral of $f(x)$.
 
 With generalizing this estimator,
-![](../../../images/Pasted%20image%2020240116195657.png)
+![](../../../../images/Pasted%20image%2020240116195657.png)
 
 In practice , a good choice for the weighting functions is given by the 'balance heurisitc'
-![](../../../images/Pasted%20image%2020240116195906.png)
+![](../../../../images/Pasted%20image%2020240116195906.png)
 And the power heuristic often reduces variance even further.
-![](../../../images/Pasted%20image%2020240116200647.png)
+![](../../../../images/Pasted%20image%2020240116200647.png)
 
 # Reference
 https://www.pbr-book.org/4ed
