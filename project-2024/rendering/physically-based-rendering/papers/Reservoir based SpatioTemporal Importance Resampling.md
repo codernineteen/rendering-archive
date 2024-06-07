@@ -49,3 +49,22 @@ RIS는 하나의 확률 분포에서 샘플들의 집합을 취하고, 우리가
 그러나 ReSTIR의 차이점은 이전에 RIS가 응용되었던 방법과 달리 reservoir라는 고정된 크기의 자료구조를 이용하여 오직 받아들일 수 있는 샘플들만 reservoir에 저장하여 안정적이면서도 실시간의 성능을 낼 수 있다는 것입니다.
 
 Reservoir를 이용하여, 더 이상 고정 크기의 배열보다 복잡한 자료구조를 필요로하지 않습니다. 그러면서도 시간적인 이웃과 공간적인 이웃으로부터의 정보를 활용함으로써, 각각의 픽셀의 직접광 샘플링 확률 밀도 함수를 통계적으로, 점진적으로 그리고 위계적으로 향상시킵니다.
+
+해당 논문에서는 spaital과 temporal단어를 많이 언급합니다. 지금부터 두 단어를 한 번에 부를 때는 '시공간'이라는 단어로, 각각에 대해서는 '시간적인', '공간적인' 이라는 형용사로 치환하여 부르겠습니다.
+
+최근 실시간 denoising 알고리즘들은 시공간 이웃들의 픽셀 색상을 재사용합니다. 반면, ReSTIR 알고리즘은 시공간 이웃에 대한 샘플링 확률들을 사용하는 것이 차이점입니다. 이 샘플링 확률들을 재사용하는 컨셉이 알고리즘을 unbiased하게 만들 수 있는 핵심 요소가 됩니다.
+
+Unbiased ReSTIR은 Biased 모드로 바꾸는 것이 가능합니다. Biased ReSTIR을 적용하면 기하적으로 불연속적인 부분들에 대해 실제보다 어두워지는 단점이 있지만, unbiased 알고리즘보다 노이즈를 더 제거할 수 있는 장점이 있습니다.
+
+
+---
+# 2. Preliminaries
+
+이 섹션에서는 수식 용어의 정확성을 위해, 한국어 번역이 이상한 term은 그대로 사용하겠습니다.
+
+- Rendering equation for BSDF
+	- $\rho$ - BSDF 
+	- $L_e$ - emitted radiance
+	- $V$ - x,y 사이의 상호적인 가시성. (x 로부터 y를 볼 수 있는지, y로 부터 x를 볼 수 있는지)
+	- $G$ - 기하적인 정보 (거리 제곱의 역과 cosine term을 가지고 있습니다. cosine term ) #todo 이 부분 설명추가!!
+$$L(y,w)=\int_A\rho(y, \vec{yx} \leftrightarrow \vec{\omega})L_e(x\rightarrow y)G(x\leftrightarrow y)V(x\leftrightarrow y)dA_x$$
