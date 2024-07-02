@@ -86,7 +86,7 @@ $$L = \int_Af(x)dx$$, 여기서 $f(x)=\rho(x)L_e(x)G(x)V(x)$
 	지금부터 Importance Sampling을 줄여서 IS라 칭하겠습니다.
 	IS에 대한 수식은 다음과 같습니다.
 	
-	$$ \langle L \rangle^{N} = \frac{1}{N} \sum_{i=1}^{N} \frac{f(x_i)}{p(x_i)} \approx L $$
+	$$\langle L \rangle^{N} = \frac{1}{N} \sum_{i=1}^{N} \frac{f(x_i)}{p(x_i)} \approx L$$
 	
 	(역자 주)중요도 샘플링에 대해 간략히 설명해보겠습니다. 우리는 적분하고자 하는 함수를 가지고 있습니다. 
 	중요도 샘플링을 적용하지 않고 몬테 카를로 추정치를 구하면 N(샘플 개수)이 무한히 증가할 때, 추정치는 true integral인 $L$에 수렴하게 될 것입니다. 하지만 매우 많은 샘플이 필요할테고, 샘플이 적어질수록 렌더링 결과에는 많은 노이즈가 생기게 될 것입니다.
