@@ -80,7 +80,7 @@ $$L_o(x, \vec{w})=L_e(x, \vec{w})+\int_{\Omega}L_i(x, \vec{w}^\prime)\cdot f_r(\
 - $cos\theta$ : light atteunation
 
 Note that we only integrate the equation against hemi-sphere, not the full sphere.
-It doesn't make sense the integrate a light outgoint in the invisible direction(over 90degree) to viewer. (we take care of this using cosine term.)
+It doesn't make sense the integrate a light outgoing in the invisible direction(over 90degree) to viewer. (we take care of this using cosine term.)
 
 But this equation is almost impossible to solve in closed form in most of complex scenes. (At the same time, the brightness of point $x$ depends on a lot of other points in the scene. Therefore, the algorithm is recursive and takes a huge amount of memory)
 	Even the integral is also infite-dimensional
