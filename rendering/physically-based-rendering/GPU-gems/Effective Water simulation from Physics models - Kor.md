@@ -78,6 +78,89 @@ $$
 
 - 지수 k 변화에 따른, wave 모양의 변화
 ![](../../../images/Pasted%20image%2020240702175201.png)
+
+### 1.3 기하적인 waves
+기하적인 waves를 위해서는 단순한 4가지 모델로 제한시킵니다.
+
+#### a. Directional or Circular waves
+- directional wave와 circular wave의 예시
+![](../../../images/Pasted%20image%2020240703161540.png)
+
+
+모델 중 하나인, directional wave는 다른 모델보다 shader instructions을 덜 요구합니다.
+Directional wave에 대해서는 단일 wave 식에 포함되는 $D_i$ 방향 벡터가 wave의 생애주기 동안 고정적입니다. 반면, Circular wave는 각 정점에 대해서 방향을 계산해줘야합니다.  
+ Circular wave $W_i$의 중심이 $C_i$라고 할 때,  $D_i$는 다음과 같이 쓸 수 있습니다.
+ 방향 벡터의 결과는 중심 벡터와 정점 벡터의 차이를 두 벡터 사이의 거리로 나눠주어 정규화한 결과와 같습니다.
+ $$D_i(x,y) = \left( \frac{(x,y) - C_i}{|(x,y)-C_i|} \right)$$
+
+#### b. Gerstner waves
+더 효과적인 시뮬레이션을 하기 위해서는 wave들의 가파름을 제어할 수 있어야 합니다.
+앞서 말했듯이, 기본 sine wave는 모든 구간에서 부드럽고 일정한 패턴을 보여줍니다. 하지만, 실제 거친 바다를 시뮬레이션 하고자 할 때는 파도가 튀어오르는 뾰족한 peak들을 표현할 수 있어야 합니다.
+
+ 이 효과를 나타내기 위해서 이전 섹션에서 새롭게 모델링한 지수적인 sine wave를 사용할 수도 있겠지만, 여기에서는 Gerstner wave를 사용하도록 하겠습니다.
+
+Gerstner wave를 사용하는 이유는 개별 마루로 정점을 움직임으로써 더 날카로운 마루를 형성할 수 있기 때문입니다.
+이는 surface에서 가장 날카로운 부분인 마루에 정점이 집중되도록 하고 싶을 때 딱 들어맞습니다.
+
+- Gerstner wave 함수의 예시
+![](../../../images/Pasted%20image%2020240703162849.png)
+
+**The Gerstner wave function :**
+
+$$
+P(x,y,t) =
+\begin{bmatrix}
+x + \sum(Q_iA_i \times D_i.x \times cos(w_iD_i\cdot(x,y)+t\times\varphi_i)) \\
+y + \sum(Q_iA_i \times D_i.y \times cos(w_iD_i\cdot(x,y)+t\times\varphi_i)) \\
+\sum(A_i\sin(w_iD_i\cdot(x,y)+t\times\varphi_i))
+\end{bmatrix}
+$$
+
+위 식에서 $Q_i$는 wave의 가파름을 조절하는 역할을 하는 파라미터입니다. $Q_i$가 0일 때는 정확히 기본 sine wave로만 구성된 모델 상 한 지점인 $(x,y,H(x,y,t))$와 동일합니다.
+Gestner Wave를 사용하면 각 정점은 x,y 좌표에 더해진 cosine term에 따라 일정 범위를 수평 방향의 앞뒤로 진동하는 형태가 되고, 높이 성분의 sine에 따라 수직 방향으로 위 아래를 진동하는 형태가 됩니다. 즉 정점이 회전하는 형태를 표현함으로써 wave의 날카로움을 표현할 수 있게 되는 것입니다.
+이때  $Q_i$를 너무 높게 잡는다면, 가장 날카로운 지점에서 롤로코스터와 같은 loop형태가 보일 수 있으므로 파라미터의 값을 적절하게 조절할 필요가 있습니다.
+
+이전 방식과 동일하게 수평방향의 각 성분으로 편미분을 진행하여 binormal과 tangent 벡터를 구해내고, 두 벡터를 외적함으로써 surface orientation을 구할 수 있습니다. 
+미분 결과는 살짝 지저분하지만, 과정 자체는 유사하므로 여기서는 생략하도록 하겠습니다.
+
+- binormal vector B
+  ![](../../../images/Pasted%20image%2020240703164946.png)
+- tangent vector T
+  ![](../../../images/Pasted%20image%2020240703164950.png)
+- surface orientation N (normal vector)
+  ![](../../../images/Pasted%20image%2020240703164954.png)
+	여기서, $WA, S(), C()$는
+	![](../../../images/Pasted%20image%2020240703165008.png)
+	로 치환.
+
+여기서 $Q_i$값에 따라 peak지점에서 loop가 왜 생기는지에 대해 엿볼 수 있습니다.
+summation term이 1보다 크다면 수직 방향에 대한 normal성분이 아래를 향하는 경우가 생기게 됩니다. 이는 peak에서 surface의 orientation에 위를 향하도록 하고 싶은 우리의 기대에 반하는 경우이죠.
+따라서 항상 summation term을 1보다 작게 유지함으로써 이 부정확한 현상을 방지할 수 있습니다.
+
+### 파장과 속도
+
+현실 세계에서의 분포를 따르지는 않고, 감당 가능할 정도의 wave들을 가지고 효과를 최대화하려고 합니다. 비슷한 길이의 wave들을 중첩시키는 것은 물 표면의 동적임을 강조하는데 도움이 됩니다.
+따라서 파장의 중간 값을 선택하고, 그 중간 값의 절반과 두 배 사이에서 wave 길이의 랜덤 값을 추출할 것 입니다.
+한 가지 기억해야할 것은 살아있는 wave의 파장을 바꿀 수는 없다는 것입니다. 만약 그렇게 할 수 있었더라면, 그 wave의 마루들은 origin으로부터 점점 멀어질 것이고 결과적으로 매우 부자연스러운 효과를 만들게 됩니다.
+따라서 우리는 현재 파장의 평균값을 변화시킬 것이며, 기존의 어떤 wave가 사라짐에 따라 그 wave와 동일한 방향으로 바뀐 평균 파장값에 기반하여 새로운 wave를 생성할 것입니다.
+
+
+파장이 주어졌을 때, 널리 알려진 물의 분산 관계(dispersion relation)에 따라 속도를 계산할 수 있습니다.
+$$w = \sqrt{g\times \frac{2\pi}{L}}$$
+, 여기서 $w$는 주파수 , g는 중력 그리고 L은 wave의 주기를 나타냅니다.
+
+#### 진폭
+진폭 계수를 어떻게 설정하느냐는 필요에 따라 달라질 수 있습니다. 
+단순함을 위해서는 상수로 두면 됩니다.
+
+#### 방향
+wave가 움직이는 방향은 다른 파라미터들과 완전히 독립적입니다. 초기에는 사전에 설정된 바람 방향에 따라 고정시킬 수 있고, 점차 랜덤으로 방향을 바꿔나갈 수도 있을 것입니다.
+
+### 1.4 wave 텍스쳐
+
+
+
+
 ---
 ## reference
 
