@@ -1,1 +1,4 @@
 - [[Break point 1 - HLSL to Spir-v compilation support]]
+- [Break point 2 - VMA migration](Break%20point%202%20-%20VMA%20migration.md)
+- [Break point 3 - Debug Vulkan Application using Renderdoc](Break%20point%203%20-%20Debug%20Vulkan%20Application%20using%20Renderdoc.md)
+- [[Break point 4 - Enable dynamic rendering extension]]
